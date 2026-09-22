@@ -1,69 +1,294 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React, { useState } from 'react';
+import Sidebar from '@/components/Sidebar';
+import Header from '@/components/Header';
+import StatCards from '@/components/StatCards';
+import RecentOrdersTable from '@/components/RecentOrdersTable';
+import LowStockWidget from '@/components/LowStockWidget';
+import PopularSizesWidget from '@/components/PopularSizesWidget';
+import OrderDetailModal from '@/components/OrderDetailModal';
+import AddProductModal from '@/components/AddProductModal';
+import { mockStats, mockOrders, mockLowStock } from '@/data/mockData';
+import { Order, PaymentStatus } from '@/types';
+import {
+  Boxes,
+  Users as UsersIcon,
+  Settings as SettingsIcon,
+  CheckCircle2,
+  Sparkles,
+  DownloadCloud,
+  Store,
+} from 'lucide-react';
+
+export default function DashboardPage() {
+  const [activeTab, setActiveTab] = useState<string>('ringkasan');
+  const [isOpenMobile, setIsOpenMobile] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3500);
+  };
+
+  const handleUpdateOrderStatus = (orderId: string, newStatus: PaymentStatus) => {
+    setOrders((prev) =>
+      prev.map((o) => (o.id === orderId ? { ...o, paymentStatus: newStatus } : o))
+    );
+    if (selectedOrder && selectedOrder.id === orderId) {
+      setSelectedOrder((prev) => (prev ? { ...prev, paymentStatus: newStatus } : null));
+    }
+    showToast(`Status pesanan ${orderId} berhasil diubah menjadi "${newStatus}"`);
+  };
+
+  const handleAddProductSuccess = (name: string) => {
+    showToast(`Produk "${name}" berhasil ditambahkan ke katalog inventaris!`);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="min-h-screen bg-slate-50 flex">
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2.5 text-xs font-medium animate-in fade-in-50 slide-in-from-bottom-3 duration-200">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Left Sidebar */}
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        isOpenMobile={isOpenMobile}
+        setIsOpenMobile={setIsOpenMobile}
+      />
+
+      {/* Main Content Area */}
+      <div className="flex-1 lg:pl-72 flex flex-col min-w-0">
+        {/* Top Header */}
+        <Header
+          onOpenMobileMenu={() => setIsOpenMobile(true)}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          onOpenAddModal={() => setIsAddModalOpen(true)}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+
+        {/* Dashboard Main Container */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
+          {/* Welcome Banner / Overview Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+                  Pantauan Penjualan & Toko Sepatu
+                </h1>
+                <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Live Kasir
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                Kelola penjualan ritel, pantau status pembayaran, dan kontrol stok sepatu toko fisik & online Anda.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2.5 shrink-0">
+              <button
+                onClick={() => showToast('Laporan penjualan September 2026 berhasil diekspor (PDF/Excel)')}
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-all shadow-2xs"
+              >
+                <DownloadCloud className="w-4 h-4 text-slate-500" />
+                <span>Unduh Laporan</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Render based on active tab */}
+          {activeTab === 'ringkasan' && (
+            <>
+              {/* 4 Stat Cards */}
+              <section aria-label="Statistik Toko">
+                <StatCards
+                  stats={mockStats}
+                  onFilterLowStock={() => setActiveTab('inventaris')}
+                />
+              </section>
+
+              {/* Side-by-side widgets: Low Stock Alert & Popular Sizes */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="lg:col-span-7">
+                  <LowStockWidget lowStockItems={mockLowStock} />
+                </div>
+                <div className="lg:col-span-5">
+                  <PopularSizesWidget />
+                </div>
+              </div>
+
+              {/* Recent Orders Table */}
+              <section aria-label="Tabel Pesanan">
+                <RecentOrdersTable
+                  orders={orders}
+                  onSelectOrder={(order) => setSelectedOrder(order)}
+                  searchFilter={searchQuery}
+                />
+              </section>
+            </>
+          )}
+
+          {activeTab === 'pesanan' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-bold text-slate-900">Manajemen Semua Pesanan</h2>
+                  <p className="text-xs text-slate-500">
+                    Daftar seluruh transaksi yang masuk dari kasir toko, website, dan kurir.
+                  </p>
+                </div>
+              </div>
+              <RecentOrdersTable
+                orders={orders}
+                onSelectOrder={(order) => setSelectedOrder(order)}
+                searchFilter={searchQuery}
+              />
+            </div>
+          )}
+
+          {activeTab === 'inventaris' && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+                <div>
+                  <h2 className="text-lg font-bold text-slate-900">Inventaris & Stok Sepatu</h2>
+                  <p className="text-xs text-slate-500">
+                    Pantau stok berdasarkan ukuran (EUR), merk sepatu, dan SKU gudang.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-sm shadow-indigo-200"
+                >
+                  + Tambah Varian Baru
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="lg:col-span-8">
+                  <LowStockWidget lowStockItems={mockLowStock} />
+                </div>
+                <div className="lg:col-span-4">
+                  <PopularSizesWidget />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'pelanggan' && (
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs">
+              <div className="flex items-center gap-2 mb-4">
+                <UsersIcon className="w-5 h-5 text-indigo-600" />
+                <h2 className="text-base font-bold text-slate-900">Direktori Pelanggan Toko</h2>
+              </div>
+              <p className="text-xs text-slate-500 mb-6">
+                Total 1.420 pelanggan terdaftar dengan program loyalitas poin sepatu.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {orders.slice(0, 6).map((ord) => (
+                  <div
+                    key={ord.id}
+                    className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/60 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs">
+                        {ord.customerName.slice(0, 2).toUpperCase()}
+                      </div>
+                      <div className="overflow-hidden">
+                        <p className="font-semibold text-slate-900 text-sm truncate">
+                          {ord.customerName}
+                        </p>
+                        <p className="text-xs text-slate-500 truncate">{ord.customerEmail}</p>
+                      </div>
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-slate-200/60 flex items-center justify-between text-xs text-slate-500">
+                      <span>{ord.customerCity}</span>
+                      <span className="font-semibold text-indigo-600">VIP Member</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'pengaturan' && (
+            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs max-w-3xl">
+              <div className="flex items-center gap-2 mb-2">
+                <SettingsIcon className="w-5 h-5 text-indigo-600" />
+                <h2 className="text-base font-bold text-slate-900">Pengaturan Toko Sepatu</h2>
+              </div>
+              <p className="text-xs text-slate-500 mb-6">
+                Konfigurasi profil toko fisik, nomor WhatsApp kasir, dan rekening penerimaan.
+              </p>
+
+              <div className="space-y-4 text-xs">
+                <div>
+                  <label className="block font-semibold text-slate-700 mb-1">Nama Toko Retail</label>
+                  <input
+                    type="text"
+                    defaultValue="KICKSMATE - Sneakers & Footwear Vault"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-800"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">Kota / Cabang</label>
+                    <input
+                      type="text"
+                      defaultValue="Bandung - Cabang Dago"
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-800"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-slate-700 mb-1">Mata Uang</label>
+                    <input
+                      type="text"
+                      defaultValue="IDR (Rupiah Rp)"
+                      disabled
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-100 text-slate-600"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <button
+                    onClick={() => showToast('Pengaturan toko berhasil diperbarui')}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors shadow-sm shadow-indigo-200"
+                  >
+                    Simpan Perubahan
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* Order Detail Modal */}
+      <OrderDetailModal
+        order={selectedOrder}
+        onClose={() => setSelectedOrder(null)}
+        onUpdateStatus={handleUpdateOrderStatus}
+      />
+
+      {/* Add Product Modal */}
+      <AddProductModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={handleAddProductSuccess}
+      />
     </div>
   );
 }
