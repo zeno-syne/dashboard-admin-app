@@ -19,6 +19,7 @@ import {
   DownloadCloud,
   X,
   Footprints,
+  Flame,
 } from 'lucide-react';
 
 interface CommandPaletteModalProps {
@@ -77,6 +78,7 @@ export default function CommandPaletteModal({
     { id: 'pos', label: 'POS Terminal Cashier', icon: Receipt, category: 'Navigation' },
     { id: 'pesanan', label: 'Order Management & Shipping', icon: ShoppingBag, category: 'Navigation' },
     { id: 'inventaris', label: 'Inventory & Size Matrix', icon: Boxes, category: 'Navigation' },
+    { id: 'drops', label: 'Drops & Raffles Launchpad', icon: Flame, category: 'Navigation' },
     { id: 'analitik', label: 'Profit & Margin Analytics', icon: TrendingUp, category: 'Navigation' },
     { id: 'pelanggan', label: 'VIP Collectors & CRM', icon: Users, category: 'Navigation' },
     { id: 'pengaturan', label: 'Store & Receipt Settings', icon: Settings, category: 'Navigation' },

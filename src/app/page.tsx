@@ -21,8 +21,9 @@ import PwaOfflineManager from '@/components/PwaOfflineManager';
 import SalesRevenueTrendChart from '@/components/SalesRevenueTrendChart';
 import CommandPaletteModal from '@/components/CommandPaletteModal';
 import BranchSwitcherModal, { StoreBranch, STORE_BRANCHES } from '@/components/BranchSwitcherModal';
-import { mockStats, mockOrders, mockProducts, mockCustomers, defaultStoreSettings } from '@/data/mockData';
-import { Order, PaymentStatus, ShoeProduct, LowStockShoe, PosTransaction, Customer, StoreSettings } from '@/types';
+import DropsModule from '@/components/DropsModule';
+import { mockStats, mockOrders, mockProducts, mockCustomers, defaultStoreSettings, mockSneakerDrops, mockStockTransfers } from '@/data/mockData';
+import { Order, PaymentStatus, ShoeProduct, LowStockShoe, PosTransaction, Customer, StoreSettings, SneakerDrop, StockTransfer } from '@/types';
 import {
   Boxes,
   Users as UsersIcon,
@@ -60,6 +61,8 @@ export default function DashboardPage() {
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState<boolean>(false);
   const [currentBranch, setCurrentBranch] = useState<StoreBranch>(STORE_BRANCHES[0]);
   const [isBranchModalOpen, setIsBranchModalOpen] = useState<boolean>(false);
+  const [drops, setDrops] = useState<SneakerDrop[]>(mockSneakerDrops);
+  const [transfers, setTransfers] = useState<StockTransfer[]>(mockStockTransfers);
 
   // Global ⌘K Shortcut Listener
   useEffect(() => {
@@ -629,6 +632,17 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
+          )}
+
+          {activeTab === 'drops' && (
+            <DropsModule
+              drops={drops}
+              onUpdateDrops={setDrops}
+              transfers={transfers}
+              onUpdateTransfers={setTransfers}
+              products={products}
+              showToast={showToast}
+            />
           )}
 
           {activeTab === 'analitik' && (

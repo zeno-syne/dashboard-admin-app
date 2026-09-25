@@ -132,3 +132,49 @@ export interface StoreSettings {
   taxPercentage: number;
   showLogoOnReceipt: boolean;
 }
+
+export type DropStatus = 'Raffle Open' | 'Upcoming Drop' | 'Live Queue' | 'Draw Completed';
+export type DropMechanism = 'Digital Raffle' | 'In-Store Balloting' | 'VIP Priority Draw' | 'FCFS Speed Drop';
+
+export interface RaffleWinner {
+  ticketNumber: string;
+  customerName: string;
+  size: number;
+  claimed: boolean;
+  drawnAt: string;
+}
+
+export interface SneakerDrop {
+  id: string;
+  name: string;
+  brand: string;
+  colorway: string;
+  sku: string;
+  retailPrice: number;
+  projectedResale: number;
+  releaseDate: string;
+  launchTimestamp: number;
+  status: DropStatus;
+  mechanism: DropMechanism;
+  targetBranch: string;
+  totalAllocatedPairs: number;
+  raffleEntriesCount: number;
+  sizeAllocation: Record<number, number>;
+  image?: string;
+  description: string;
+  winnersDrawn?: RaffleWinner[];
+}
+
+export interface StockTransfer {
+  id: string;
+  date: string;
+  fromBranch: string;
+  toBranch: string;
+  productName: string;
+  sku: string;
+  size: number;
+  quantity: number;
+  status: 'In Transit' | 'Dispatched' | 'Received';
+  carrier: string;
+  trackingNumber: string;
+}

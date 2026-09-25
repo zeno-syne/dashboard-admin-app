@@ -14,6 +14,7 @@ import {
   X,
   Receipt,
   TrendingUp,
+  Flame,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -30,6 +31,7 @@ export const menuItems = [
   { id: 'pos', label: 'POS Terminal', icon: Receipt, badge: 'Cashier' },
   { id: 'pesanan', label: 'Orders', icon: ShoppingBag, badge: '3 New' },
   { id: 'inventaris', label: 'Inventory', icon: Boxes, badge: 'Stock' },
+  { id: 'drops', label: 'Drops & Raffles', icon: Flame, badge: 'Hot' },
   { id: 'analitik', label: 'Profit & Margins', icon: TrendingUp, badge: 'Margin' },
   { id: 'pelanggan', label: 'Customers & VIP', icon: Users, badge: null },
   { id: 'pengaturan', label: 'Store Settings', icon: Settings, badge: null },
