@@ -170,12 +170,12 @@ export default function Sidebar({
             <div className="flex items-center gap-3">
               <div className="relative">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-slate-800 to-slate-700 text-white font-semibold text-xs flex items-center justify-center shadow-xs">
-                  AO
+                  ZN
                 </div>
                 <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
               </div>
               <div className="overflow-hidden">
-                <p className="text-xs font-bold text-slate-900 truncate">Agung Ota</p>
+                <p className="text-xs font-bold text-slate-900 truncate">Zeno</p>
                 <p className="text-[11px] text-slate-500 truncate">Head of Retail / Admin</p>
               </div>
             </div>

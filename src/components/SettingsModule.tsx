@@ -443,7 +443,7 @@ export default function SettingsModule({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Cashier:</span>
-                  <span>Agung Ota (Terminal 1)</span>
+                  <span>Zeno (Terminal 1)</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-500">Customer:</span>

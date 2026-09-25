@@ -322,7 +322,7 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
       id: trxId,
       customerName: customerName.trim() || 'Walk-in Customer',
       customerPhone: customerPhone.trim() || undefined,
-      cashierName: 'Agung Ota (Terminal 1)',
+      cashierName: 'Zeno (Terminal 1)',
       branchName: 'KICKSMATE - SoHo NYC Flagship',
       date: dateFormatted,
       items: [...cart],
@@ -363,7 +363,7 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
         <div className="flex items-center gap-3 text-xs bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200/70 shrink-0">
           <div>
             <span className="text-slate-400 text-[10px] block">Cashier Station</span>
-            <span className="font-bold text-slate-800">Agung Ota</span>
+            <span className="font-bold text-slate-800">Zeno</span>
           </div>
           <div className="w-px h-6 bg-slate-200" />
           <div>
