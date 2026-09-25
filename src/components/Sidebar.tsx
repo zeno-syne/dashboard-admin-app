@@ -13,6 +13,7 @@ import {
   LogOut,
   X,
   Receipt,
+  TrendingUp,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -27,6 +28,7 @@ export const menuItems = [
   { id: 'pos', label: 'Kasir POS', icon: Receipt, badge: 'Kasir' },
   { id: 'pesanan', label: 'Pesanan', icon: ShoppingBag, badge: '3 Baru' },
   { id: 'inventaris', label: 'Inventaris', icon: Boxes, badge: 'Stok' },
+  { id: 'analitik', label: 'Laba & Margin', icon: TrendingUp, badge: 'Profit' },
   { id: 'pelanggan', label: 'Pelanggan', icon: Users, badge: null },
   { id: 'pengaturan', label: 'Pengaturan', icon: Settings, badge: null },
 ];

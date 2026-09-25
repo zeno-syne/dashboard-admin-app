@@ -15,6 +15,7 @@ import PosModule from '@/components/PosModule';
 import ReceiptModal from '@/components/ReceiptModal';
 import CustomersModule from '@/components/CustomersModule';
 import SettingsModule from '@/components/SettingsModule';
+import FinancialAnalyticsModule from '@/components/FinancialAnalyticsModule';
 import { mockStats, mockOrders, mockProducts, mockCustomers, defaultStoreSettings } from '@/data/mockData';
 import { Order, PaymentStatus, ShoeProduct, LowStockShoe, PosTransaction, Customer, StoreSettings } from '@/types';
 import {
@@ -534,6 +535,13 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
+          )}
+
+          {activeTab === 'analitik' && (
+            <FinancialAnalyticsModule
+              orders={orders}
+              products={products}
+            />
           )}
 
           {activeTab === 'pelanggan' && (
