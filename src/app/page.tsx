@@ -20,6 +20,7 @@ import FinancialAnalyticsModule from '@/components/FinancialAnalyticsModule';
 import PwaOfflineManager from '@/components/PwaOfflineManager';
 import SalesRevenueTrendChart from '@/components/SalesRevenueTrendChart';
 import CommandPaletteModal from '@/components/CommandPaletteModal';
+import BranchSwitcherModal, { StoreBranch, STORE_BRANCHES } from '@/components/BranchSwitcherModal';
 import { mockStats, mockOrders, mockProducts, mockCustomers, defaultStoreSettings } from '@/data/mockData';
 import { Order, PaymentStatus, ShoeProduct, LowStockShoe, PosTransaction, Customer, StoreSettings } from '@/types';
 import {
@@ -57,6 +58,8 @@ export default function DashboardPage() {
   const [lastTransaction, setLastTransaction] = useState<PosTransaction | null>(null);
   const [isReceiptOpen, setIsReceiptOpen] = useState<boolean>(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState<boolean>(false);
+  const [currentBranch, setCurrentBranch] = useState<StoreBranch>(STORE_BRANCHES[0]);
+  const [isBranchModalOpen, setIsBranchModalOpen] = useState<boolean>(false);
 
   // Global ⌘K Shortcut Listener
   useEffect(() => {
@@ -481,6 +484,8 @@ export default function DashboardPage() {
           setActiveTab={setActiveTab}
           isOpenMobile={isOpenMobile}
           setIsOpenMobile={setIsOpenMobile}
+          currentBranch={currentBranch}
+          onOpenBranchSwitcher={() => setIsBranchModalOpen(true)}
         />
 
         {/* Main Content Area */}
@@ -710,6 +715,17 @@ export default function DashboardPage() {
           setIsCommandPaletteOpen(false);
         }}
         onExportCsv={handleExportCsv}
+      />
+
+      {/* Omnichannel Multi-Store Branch Switcher */}
+      <BranchSwitcherModal
+        isOpen={isBranchModalOpen}
+        onClose={() => setIsBranchModalOpen(false)}
+        selectedBranchId={currentBranch.id}
+        onSelectBranch={(branch) => {
+          setCurrentBranch(branch);
+          showToast(`Active branch switched to ${branch.name} (${branch.city})`);
+        }}
       />
     </div>
   );

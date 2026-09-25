@@ -4,6 +4,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { ShoeProduct, PosCartItem, PosTransaction, PaymentMethod } from '@/types';
 import ShoeImage from '@/components/ShoeImage';
 import { formatCurrency } from '@/utils/formatters';
+import { soundFx } from '@/utils/audio';
 import {
   Search,
   ShoppingCart,
@@ -60,43 +61,12 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
 
   // Crisp high-pitch beep for barcode scan success (laser scanner sound)
   const playBarcodeScanSuccess = () => {
-    try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(1760, ctx.currentTime);
-      gain.gain.setValueAtTime(0.08, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.09);
-    } catch {}
+    soundFx.playBarcodeBeep();
   };
 
   // Subtle synthesized audio feedback (Cash register tactile tick)
   const playTactileBeep = () => {
-    try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(800, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.04);
-      gain.gain.setValueAtTime(0.06, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.05);
-    } catch {
-      // Ignore silently if audio is restricted
-    }
+    soundFx.playClickTone();
   };
 
   // Keyboard shortcut listener (/ to focus search, Esc to clear)
@@ -334,6 +304,7 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
       changeDue: paymentMethod === 'Cash' ? changeDue : 0,
     };
 
+    soundFx.playSuccessChime();
     onCompleteTransaction(newTransaction);
     handleResetCart();
   };

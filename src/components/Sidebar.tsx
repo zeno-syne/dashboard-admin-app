@@ -21,6 +21,8 @@ interface SidebarProps {
   setActiveTab: (tab: string) => void;
   isOpenMobile: boolean;
   setIsOpenMobile: (open: boolean) => void;
+  currentBranch?: { name: string; city: string };
+  onOpenBranchSwitcher?: () => void;
 }
 
 export const menuItems = [
@@ -38,6 +40,8 @@ export default function Sidebar({
   setActiveTab,
   isOpenMobile,
   setIsOpenMobile,
+  currentBranch,
+  onOpenBranchSwitcher,
 }: SidebarProps) {
   return (
     <>
@@ -84,20 +88,28 @@ export default function Sidebar({
 
         {/* Store Branch Chip */}
         <div className="px-5 pt-4 pb-2">
-          <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/80 transition-colors cursor-pointer group">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-700 shadow-2xs">
+          <div
+            onClick={onOpenBranchSwitcher}
+            title="Click to switch retail branch"
+            className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 hover:bg-slate-100/90 hover:border-indigo-300 transition-all cursor-pointer group"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-700 shadow-2xs group-hover:scale-105 transition-transform shrink-0">
                 <Store className="w-4 h-4 text-indigo-600" />
               </div>
-              <div>
-                <p className="text-xs font-semibold text-slate-800">SoHo Flagship Store</p>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-slate-800 truncate group-hover:text-indigo-600 transition-colors">
+                  {currentBranch?.name || 'SoHo Flagship Store'}
+                </p>
                 <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <p className="text-[11px] text-slate-500">New York • POS Online</p>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                  <p className="text-[11px] text-slate-500 truncate">
+                    {currentBranch?.city || 'New York'} • POS Online
+                  </p>
                 </div>
               </div>
             </div>
-            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all" />
+            <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
           </div>
         </div>
 

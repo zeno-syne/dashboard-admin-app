@@ -11,7 +11,10 @@ import {
   AlertCircle,
   PackageCheck,
   Zap,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
+import { soundFx } from '@/utils/audio';
 
 interface HeaderProps {
   onOpenMobileMenu: () => void;
@@ -35,6 +38,16 @@ export default function Header({
   onOpenCommandPalette,
 }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+
+  React.useEffect(() => {
+    setSoundEnabled(soundFx.isEnabled());
+  }, []);
+
+  const handleToggleSound = () => {
+    const next = soundFx.toggle();
+    setSoundEnabled(next);
+  };
 
   const notifications = [
     {
@@ -128,6 +141,21 @@ export default function Header({
           <Calendar className="w-3.5 h-3.5 text-slate-400" />
           <span>Friday, Sep 25, 2026</span>
         </div>
+
+        {/* Sound FX Audio Toggle */}
+        <button
+          type="button"
+          onClick={handleToggleSound}
+          title={soundEnabled ? 'POS & Scanner Sound Effects: ON (Click to mute)' : 'POS & Scanner Sound Effects: MUTED (Click to unmute)'}
+          className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-none transition-colors cursor-pointer"
+          aria-label="Toggle Sound Effects"
+        >
+          {soundEnabled ? (
+            <Volume2 className="w-5 h-5 text-indigo-600" />
+          ) : (
+            <VolumeX className="w-5 h-5 text-slate-400" />
+          )}
+        </button>
 
         {/* Notification Bell with Dropdown */}
         <div className="relative">
