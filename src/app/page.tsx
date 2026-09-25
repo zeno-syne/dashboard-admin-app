@@ -18,6 +18,7 @@ import CustomersModule from '@/components/CustomersModule';
 import SettingsModule from '@/components/SettingsModule';
 import FinancialAnalyticsModule from '@/components/FinancialAnalyticsModule';
 import PwaOfflineManager from '@/components/PwaOfflineManager';
+import SalesRevenueTrendChart from '@/components/SalesRevenueTrendChart';
 import { mockStats, mockOrders, mockProducts, mockCustomers, defaultStoreSettings } from '@/data/mockData';
 import { Order, PaymentStatus, ShoeProduct, LowStockShoe, PosTransaction, Customer, StoreSettings } from '@/types';
 import {
@@ -528,6 +529,11 @@ export default function DashboardPage() {
                   stats={mockStats}
                   onFilterLowStock={() => setActiveTab('inventaris')}
                 />
+              </section>
+
+              {/* Interactive 7-Day Revenue & Footfall Curve Chart */}
+              <section aria-label="Omnichannel Velocity Curve">
+                <SalesRevenueTrendChart />
               </section>
 
               {/* Side-by-side widgets: Low Stock Alert & Popular Sizes */}

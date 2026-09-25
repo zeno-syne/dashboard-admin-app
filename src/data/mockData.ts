@@ -9,6 +9,8 @@ export const mockStats: StatItem[] = [
     isPositive: true,
     timeframe: 'vs last month',
     iconName: 'dollar',
+    sparklineData: [32000, 34500, 37200, 41000, 39500, 44200, 48650],
+    secondaryMetric: '+$7,020 this month',
   },
   {
     id: 'orders',
@@ -18,15 +20,19 @@ export const mockStats: StatItem[] = [
     isPositive: true,
     timeframe: 'vs last week',
     iconName: 'shoppingBag',
+    sparklineData: [260, 275, 290, 310, 325, 350, 382],
+    secondaryMetric: '39 in-store POS today',
   },
   {
     id: 'low-stock',
     title: 'Low Stock Alerts',
     value: '8 Variants',
-    change: 'Restock Required',
+    change: 'Action Required',
     isPositive: false,
     timeframe: 'under 3 pairs left',
     iconName: 'alertTriangle',
+    sparklineData: [14, 12, 15, 11, 9, 10, 8],
+    secondaryMetric: '3 broken size-runs',
   },
   {
     id: 'visitors',
@@ -36,7 +42,28 @@ export const mockStats: StatItem[] = [
     isPositive: true,
     timeframe: 'last 30 days',
     iconName: 'users',
+    sparklineData: [18200, 19400, 20100, 22300, 21800, 23900, 24930],
+    secondaryMetric: 'Peak 5.6k on Saturday',
   },
+];
+
+export interface DailySalesTrend {
+  day: string;
+  date: string;
+  revenue: number;
+  orders: number;
+  footfall: number;
+  topShoe: string;
+}
+
+export const mockWeeklySalesTrend: DailySalesTrend[] = [
+  { day: 'Mon', date: 'Sep 19', revenue: 5420, orders: 42, footfall: 3100, topShoe: 'Dunk Low Panda' },
+  { day: 'Tue', date: 'Sep 20', revenue: 6180, orders: 48, footfall: 3450, topShoe: 'New Balance 550' },
+  { day: 'Wed', date: 'Sep 21', revenue: 5890, orders: 45, footfall: 3320, topShoe: 'Samba OG White' },
+  { day: 'Thu', date: 'Sep 22', revenue: 7240, orders: 56, footfall: 3880, topShoe: 'Air Jordan 1 Chicago' },
+  { day: 'Fri', date: 'Sep 23', revenue: 8950, orders: 68, footfall: 4950, topShoe: 'Air Jordan 1 Chicago' },
+  { day: 'Sat', date: 'Sep 24', revenue: 9840, orders: 74, footfall: 5600, topShoe: 'New Balance 990v6' },
+  { day: 'Sun', date: 'Sep 25', revenue: 7850, orders: 61, footfall: 4200, topShoe: 'Air Jordan 4 Retro' },
 ];
 
 export const mockOrders: Order[] = [

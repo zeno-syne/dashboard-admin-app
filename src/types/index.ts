@@ -33,6 +33,8 @@ export interface StatItem {
   isPositive: boolean;
   timeframe: string;
   iconName: 'dollar' | 'shoppingBag' | 'alertTriangle' | 'users';
+  sparklineData?: number[];
+  secondaryMetric?: string;
 }
 
 export type ShoeCategory = 'Sneakers' | 'Running' | 'Casual' | 'Basketball' | 'Formal';
