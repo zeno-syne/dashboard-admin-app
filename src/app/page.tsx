@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import StatCards from '@/components/StatCards';
@@ -22,6 +22,7 @@ import {
   CheckCircle2,
   DownloadCloud,
   Receipt,
+  RotateCcw,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -32,6 +33,7 @@ export default function DashboardPage() {
   // Dynamic State for Orders and Inventory
   const [orders, setOrders] = useState<Order[]>(mockOrders);
   const [products, setProducts] = useState<ShoeProduct[]>(mockProducts);
+  const [isHydrated, setIsHydrated] = useState(false);
   
   // Modals state
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -52,6 +54,44 @@ export default function DashboardPage() {
       setToastMessage(null);
     }, 3500);
   };
+
+  // Hydrate data from localStorage once mounted
+  useEffect(() => {
+    try {
+      const savedProducts = localStorage.getItem('kicksmate_products');
+      if (savedProducts) {
+        setProducts(JSON.parse(savedProducts));
+      }
+      const savedOrders = localStorage.getItem('kicksmate_orders');
+      if (savedOrders) {
+        setOrders(JSON.parse(savedOrders));
+      }
+    } catch (e) {
+      console.error('Failed to load from storage', e);
+    }
+    setIsHydrated(true);
+  }, []);
+
+  // Save changes to localStorage
+  useEffect(() => {
+    if (isHydrated) {
+      try {
+        localStorage.setItem('kicksmate_products', JSON.stringify(products));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, [products, isHydrated]);
+
+  useEffect(() => {
+    if (isHydrated) {
+      try {
+        localStorage.setItem('kicksmate_orders', JSON.stringify(orders));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, [orders, isHydrated]);
 
   // Derive low stock list dynamically from actual products state
   const dynamicLowStock: LowStockShoe[] = useMemo(() => {
@@ -138,6 +178,60 @@ export default function DashboardPage() {
       })
     );
     showToast(`Restock +5 pasang berhasil untuk ukuran ${size}`);
+  };
+
+  // Real CSV Export
+  const handleExportCsv = () => {
+    const headers = [
+      'ID Pesanan',
+      'Tanggal',
+      'Pelanggan',
+      'Kota',
+      'Metode Pembayaran',
+      'Status Pembayaran',
+      'Kurir / Channel',
+      'Detail Produk (Item)',
+      'Total Transaksi (IDR)',
+    ];
+
+    const rows = orders.map((o) => {
+      const itemsDetail = o.items
+        .map((it) => `${it.shoeName} (Sz ${it.size} x${it.quantity})`)
+        .join('; ');
+      return [
+        `"${o.id}"`,
+        `"${o.orderDate}"`,
+        `"${o.customerName}"`,
+        `"${o.customerCity}"`,
+        `"${o.paymentMethod}"`,
+        `"${o.paymentStatus}"`,
+        `"${o.shippingCourier}"`,
+        `"${itemsDetail}"`,
+        o.totalAmount,
+      ].join(',');
+    });
+
+    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `laporan-penjualan-kicksmate-${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showToast('Laporan penjualan riil (CSV) berhasil diunduh!');
+  };
+
+  // Reset to default
+  const handleResetDefaultData = () => {
+    if (confirm('Reset semua data kembali ke default (menghapus data lokal)?')) {
+      localStorage.removeItem('kicksmate_products');
+      localStorage.removeItem('kicksmate_orders');
+      setProducts(mockProducts);
+      setOrders(mockOrders);
+      showToast('Data berhasil di-reset ke nilai awal bawaan!');
+    }
   };
 
   // Handle POS Checkout Completion
@@ -263,11 +357,11 @@ export default function DashboardPage() {
               </button>
 
               <button
-                onClick={() => showToast('Laporan penjualan September 2026 berhasil diekspor (PDF/Excel)')}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-all shadow-2xs"
+                onClick={handleExportCsv}
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-all shadow-2xs cursor-pointer"
               >
                 <DownloadCloud className="w-4 h-4 text-slate-500" />
-                <span className="hidden sm:inline">Unduh Laporan</span>
+                <span className="hidden sm:inline">Unduh Laporan (CSV)</span>
               </button>
             </div>
           </div>
@@ -432,12 +526,21 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="pt-4">
+                <div className="pt-4 flex items-center justify-between border-t border-slate-100">
                   <button
                     onClick={() => showToast('Pengaturan toko berhasil diperbarui')}
                     className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors shadow-sm shadow-indigo-200"
                   >
                     Simpan Perubahan
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleResetDefaultData}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 text-rose-600 hover:bg-rose-50 border border-rose-200/80 rounded-xl font-semibold transition-all text-xs"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Reset Data ke Awal (Hapus Cache)</span>
                   </button>
                 </div>
               </div>
