@@ -48,9 +48,10 @@ export default function RecentOrdersTable({
     return matchesStatus && matchesSearch;
   });
 
-  const getStatusBadge = (status: PaymentStatus) => {
+  const getStatusBadge = (status: PaymentStatus | string) => {
     switch (status) {
       case 'Paid':
+      case 'Lunas':
         return {
           label: 'Paid',
           bg: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
@@ -58,6 +59,7 @@ export default function RecentOrdersTable({
           icon: CheckCircle2,
         };
       case 'Pending':
+      case 'Menunggu':
         return {
           label: 'Pending',
           bg: 'bg-amber-50 text-amber-700 border-amber-200/80',
@@ -65,6 +67,7 @@ export default function RecentOrdersTable({
           icon: Clock,
         };
       case 'Processing':
+      case 'Diproses':
         return {
           label: 'Processing',
           bg: 'bg-blue-50 text-blue-700 border-blue-200/80',
@@ -72,11 +75,19 @@ export default function RecentOrdersTable({
           icon: RefreshCw,
         };
       case 'Cancelled':
+      case 'Dibatalkan':
         return {
           label: 'Cancelled',
           bg: 'bg-rose-50 text-rose-700 border-rose-200/80',
           dot: 'bg-rose-500',
           icon: XCircle,
+        };
+      default:
+        return {
+          label: status || 'Paid',
+          bg: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
+          dot: 'bg-emerald-500',
+          icon: CheckCircle2,
         };
     }
   };

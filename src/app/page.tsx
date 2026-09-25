@@ -68,21 +68,35 @@ export default function DashboardPage() {
   // Hydrate data from localStorage once mounted
   useEffect(() => {
     try {
-      const savedProducts = localStorage.getItem('kicksmate_products');
-      if (savedProducts) {
-        setProducts(JSON.parse(savedProducts));
-      }
-      const savedOrders = localStorage.getItem('kicksmate_orders');
-      if (savedOrders) {
-        setOrders(JSON.parse(savedOrders));
-      }
-      const savedCustomers = localStorage.getItem('kicksmate_customers');
-      if (savedCustomers) {
-        setCustomers(JSON.parse(savedCustomers));
-      }
-      const savedSettings = localStorage.getItem('kicksmate_settings');
-      if (savedSettings) {
-        setSettings(JSON.parse(savedSettings));
+      const currentVersion = localStorage.getItem('kicksmate_version');
+      if (currentVersion !== '2.0.0') {
+        // Clear legacy IDR/Indonesian schema cache to prevent hydration crashes
+        localStorage.removeItem('kicksmate_products');
+        localStorage.removeItem('kicksmate_orders');
+        localStorage.removeItem('kicksmate_customers');
+        localStorage.removeItem('kicksmate_settings');
+        localStorage.setItem('kicksmate_version', '2.0.0');
+        setProducts(mockProducts);
+        setOrders(mockOrders);
+        setCustomers(mockCustomers);
+        setSettings(defaultStoreSettings);
+      } else {
+        const savedProducts = localStorage.getItem('kicksmate_products');
+        if (savedProducts) {
+          setProducts(JSON.parse(savedProducts));
+        }
+        const savedOrders = localStorage.getItem('kicksmate_orders');
+        if (savedOrders) {
+          setOrders(JSON.parse(savedOrders));
+        }
+        const savedCustomers = localStorage.getItem('kicksmate_customers');
+        if (savedCustomers) {
+          setCustomers(JSON.parse(savedCustomers));
+        }
+        const savedSettings = localStorage.getItem('kicksmate_settings');
+        if (savedSettings) {
+          setSettings(JSON.parse(savedSettings));
+        }
       }
       const savedOfflineQueue = localStorage.getItem('kicksmate_offline_queue');
       if (savedOfflineQueue) {
@@ -282,6 +296,7 @@ export default function DashboardPage() {
       localStorage.removeItem('kicksmate_orders');
       localStorage.removeItem('kicksmate_customers');
       localStorage.removeItem('kicksmate_settings');
+      localStorage.setItem('kicksmate_version', '2.0.0');
       setProducts(mockProducts);
       setOrders(mockOrders);
       setCustomers(mockCustomers);
