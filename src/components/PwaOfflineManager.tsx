@@ -113,9 +113,9 @@ export default function PwaOfflineManager({
               <WifiOff className="w-3.5 h-3.5 text-amber-200" />
             </div>
             <div>
-              <span className="font-bold">Mode Kasir Offline Aktif</span>
+              <span className="font-bold">Offline POS Mode Active</span>
               <span className="font-normal text-amber-100 ml-1.5 hidden sm:inline">
-                • Koneksi internet terputus. Kasir POS tetap dapat memproses checkout & cetak struk secara lokal.
+                • Internet connection interrupted. POS Terminal continues processing checkouts and printing receipts locally.
               </span>
             </div>
           </div>
@@ -123,7 +123,7 @@ export default function PwaOfflineManager({
           <div className="flex items-center gap-2 shrink-0">
             {pendingOfflineCount > 0 && (
               <span className="px-2 py-0.5 rounded-full bg-amber-800 text-amber-100 font-mono text-[10px]">
-                {pendingOfflineCount} transaksi tersimpan lokal
+                {pendingOfflineCount} queued locally
               </span>
             )}
             {onToggleSimulateOffline && (
@@ -132,7 +132,7 @@ export default function PwaOfflineManager({
                 onClick={onToggleSimulateOffline}
                 className="px-2.5 py-1 rounded-lg bg-amber-700 hover:bg-amber-800 text-[11px] font-bold transition-colors cursor-pointer"
               >
-                Pulihkan Koneksi
+                Reconnect Network
               </button>
             )}
           </div>
@@ -144,7 +144,7 @@ export default function PwaOfflineManager({
         <div className="bg-emerald-600 text-white px-4 py-2 text-xs font-semibold flex items-center justify-between shadow-md animate-in slide-in-from-top-2 duration-200">
           <div className="flex items-center gap-2">
             <Wifi className="w-4 h-4 text-emerald-200" />
-            <span>Koneksi Internet Pulih! Sinkronisasi otomatis ke cloud aktif.</span>
+            <span>Connection Restored! Cloud automatic synchronization active.</span>
           </div>
         </div>
       )}
@@ -153,7 +153,7 @@ export default function PwaOfflineManager({
       {syncing && (
         <div className="fixed top-4 right-4 z-50 bg-slate-900 text-white px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2.5 text-xs font-semibold animate-in fade-in-50">
           <RefreshCw className="w-4 h-4 text-indigo-400 animate-spin" />
-          <span>Menyinkronkan data transaksi offline ke cloud...</span>
+          <span>Syncing offline transactions to cloud vault...</span>
         </div>
       )}
 
@@ -164,8 +164,8 @@ export default function PwaOfflineManager({
             <Smartphone className="w-5 h-5" />
           </div>
           <div className="flex-1">
-            <p className="font-bold text-white leading-tight">Pasang Aplikasi Kasir</p>
-            <p className="text-[11px] text-slate-400">Install KICKSMATE di iPad / Desktop kasir untuk akses offline instan.</p>
+            <p className="font-bold text-white leading-tight">Install POS Terminal App</p>
+            <p className="text-[11px] text-slate-400">Install KICKSMATE on register iPad / Desktop for instant offline access.</p>
           </div>
           <button
             onClick={handleInstallClick}

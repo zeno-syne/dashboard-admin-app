@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { mockPopularSizes } from '@/data/mockData';
-import { Ruler, CreditCard, Sparkles } from 'lucide-react';
+import { Ruler, Sparkles } from 'lucide-react';
 
 export default function PopularSizesWidget() {
   return (
@@ -14,8 +14,8 @@ export default function PopularSizesWidget() {
               <Ruler className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Ukuran Sepatu Paling Laris</h3>
-              <p className="text-[11px] text-slate-400">Distribusi demand size bulan ini</p>
+              <h3 className="text-sm font-bold text-slate-900">Top-Selling Footwear Sizes</h3>
+              <p className="text-[11px] text-slate-400">Monthly customer size demand curve</p>
             </div>
           </div>
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
@@ -29,12 +29,12 @@ export default function PopularSizesWidget() {
             <div key={item.size} className="space-y-1">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-semibold text-slate-800">
-                  Size {item.size}{' '}
+                  Size EUR {item.size}{' '}
                   <span className="text-[11px] font-normal text-slate-400">
                     ({item.count})
                   </span>
                 </span>
-                <span className="font-bold text-indigo-600">{item.percentage}%</span>
+                <span className="font-bold text-indigo-600 font-mono">{item.percentage}%</span>
               </div>
               <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                 <div
@@ -51,9 +51,9 @@ export default function PopularSizesWidget() {
       <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-50/70 to-slate-50 border border-indigo-100/70 flex items-start gap-2.5">
         <Sparkles className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
         <div className="text-xs">
-          <p className="font-semibold text-slate-900">Rekomendasi Restock</p>
+          <p className="font-semibold text-slate-900">Restock Recommendation</p>
           <p className="text-slate-500 text-[11px] mt-0.5">
-            Size 41 & 42 menyumbang 65% transaksi. Prioritaskan alokasi belanja modal untuk 2 size ini.
+            Sizes 41 & 42 generate 65% of checkout transactions. Prioritize procurement allocations for these two sizes.
           </p>
         </div>
       </div>

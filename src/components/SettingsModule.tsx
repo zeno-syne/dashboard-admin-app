@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { StoreSettings } from '@/types';
+import { formatCurrency } from '@/utils/formatters';
 import {
   Settings,
   Store,
@@ -62,8 +63,6 @@ export default function SettingsModule({
     setTimeout(() => setIsSaved(false), 3000);
   };
 
-  const formatRupiah = (val: number) => 'Rp ' + val.toLocaleString('id-ID');
-
   return (
     <div className="space-y-6">
       {/* Settings Top Header */}
@@ -74,10 +73,10 @@ export default function SettingsModule({
           </div>
           <div>
             <h2 className="font-extrabold text-slate-900 text-base tracking-tight">
-              Pengaturan Toko & Printer Struk
+              Store & Thermal Printer Settings
             </h2>
             <p className="text-xs text-slate-500">
-              Kustomisasi identitas outlet, format cetak printer thermal (58mm/80mm), dan footer nota.
+              Configure flagship boutique profile, thermal printer spools (58mm/80mm), tax policies, and digital receipt format.
             </p>
           </div>
         </div>
@@ -85,7 +84,7 @@ export default function SettingsModule({
         {isSaved && (
           <div className="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold flex items-center gap-1.5 animate-in fade-in-50">
             <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-            <span>Pengaturan Berhasil Disimpan!</span>
+            <span>Settings Saved Successfully!</span>
           </div>
         )}
       </div>
@@ -106,7 +105,7 @@ export default function SettingsModule({
               }`}
             >
               <Store className="w-3.5 h-3.5" />
-              <span>Profil Toko & Cabang</span>
+              <span>Store Profile & Branch</span>
             </button>
 
             <button
@@ -119,7 +118,7 @@ export default function SettingsModule({
               }`}
             >
               <Printer className="w-3.5 h-3.5" />
-              <span>Struk Thermal (58/80mm)</span>
+              <span>Thermal Receipt (58/80mm)</span>
             </button>
 
             <button
@@ -132,17 +131,17 @@ export default function SettingsModule({
               }`}
             >
               <DollarSign className="w-3.5 h-3.5" />
-              <span>Pajak & Kebijakan</span>
+              <span>Taxes & Policies</span>
             </button>
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-4 text-xs">
-            {/* TAB 1: Profil Toko & Cabang */}
+            {/* TAB 1: Store Profile & Branch */}
             {activeSubTab === 'profile' && (
               <div className="space-y-4 animate-in fade-in-50 duration-150">
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
-                    Nama Toko / Brand Utama
+                    Store Name / Primary Brand
                   </label>
                   <input
                     type="text"
@@ -156,7 +155,7 @@ export default function SettingsModule({
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block font-semibold text-slate-700 mb-1">
-                      Slogan / Tagline
+                      Tagline / Slogan
                     </label>
                     <input
                       type="text"
@@ -168,7 +167,7 @@ export default function SettingsModule({
 
                   <div>
                     <label className="block font-semibold text-slate-700 mb-1">
-                      Nama Cabang / Outlet
+                      Branch / Flagship Location
                     </label>
                     <input
                       type="text"
@@ -181,7 +180,7 @@ export default function SettingsModule({
 
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
-                    Alamat Lengkap Toko Fisik
+                    Physical Store Address
                   </label>
                   <input
                     type="text"
@@ -195,7 +194,7 @@ export default function SettingsModule({
                   <div>
                     <label className="block font-semibold text-slate-700 mb-1 flex items-center gap-1">
                       <Phone className="w-3 h-3 text-slate-400" />
-                      No. WhatsApp
+                      Phone / Support
                     </label>
                     <input
                       type="text"
@@ -208,7 +207,7 @@ export default function SettingsModule({
                   <div>
                     <label className="block font-semibold text-slate-700 mb-1 flex items-center gap-1">
                       <InstagramIcon className="w-3 h-3 text-slate-400" />
-                      Instagram Toko
+                      Instagram Handle
                     </label>
                     <input
                       type="text"
@@ -221,7 +220,7 @@ export default function SettingsModule({
                   <div>
                     <label className="block font-semibold text-slate-700 mb-1 flex items-center gap-1">
                       <Globe className="w-3 h-3 text-slate-400" />
-                      Website
+                      Official Website
                     </label>
                     <input
                       type="text"
@@ -234,12 +233,12 @@ export default function SettingsModule({
               </div>
             )}
 
-            {/* TAB 2: Struk Thermal (58/80mm) */}
+            {/* TAB 2: Thermal Receipt (58/80mm) */}
             {activeSubTab === 'receipt' && (
               <div className="space-y-4 animate-in fade-in-50 duration-150">
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1.5">
-                    Format Ukuran Kertas Thermal Printer
+                    Thermal Printer Paper Dimensions
                   </label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
@@ -253,9 +252,9 @@ export default function SettingsModule({
                     >
                       <Receipt className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-bold text-slate-900 text-xs">Standar 80mm</p>
+                        <p className="font-bold text-slate-900 text-xs">Standard 80mm</p>
                         <p className="text-[11px] text-slate-500 mt-0.5">
-                          Printer kasir meja desktop (Epson TM-T82, Star, Sunmi, dll). Layout lapang & jelas.
+                          Desktop POS receipt printer (Epson TM-T82, Star Micronics, Sunmi). Full detail, high readability.
                         </p>
                       </div>
                     </button>
@@ -271,9 +270,9 @@ export default function SettingsModule({
                     >
                       <Printer className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-bold text-slate-900 text-xs">Kompak 58mm</p>
+                        <p className="font-bold text-slate-900 text-xs">Compact 58mm</p>
                         <p className="text-[11px] text-slate-500 mt-0.5">
-                          Printer Bluetooth mobile/portable saku. Format ringkas & hemat kertas.
+                          Mobile Bluetooth / wireless terminal printer. Compact footprint and paper-saving.
                         </p>
                       </div>
                     </button>
@@ -282,32 +281,32 @@ export default function SettingsModule({
 
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
-                    Batas Waktu Tukar Ukuran (Hari)
+                    Return & Exchange Window (Days)
                   </label>
                   <div className="flex items-center gap-2">
                     <input
                       type="number"
                       min="1"
-                      max="30"
+                      max="60"
                       value={form.returnPolicyDays}
-                      onChange={(e) => handleChange('returnPolicyDays', parseInt(e.target.value, 10) || 3)}
+                      onChange={(e) => handleChange('returnPolicyDays', parseInt(e.target.value, 10) || 14)}
                       className="w-20 px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white text-slate-800 font-bold text-center"
                     />
                     <span className="text-slate-500 text-xs">
-                      hari sejak tanggal pembelian (tertera di nota)
+                      days from purchase date (printed on receipt)
                     </span>
                   </div>
                 </div>
 
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
-                    Pesan Kustom Footer Struk
+                    Custom Receipt Footer Remarks
                   </label>
                   <textarea
                     rows={3}
                     value={form.customFooterText}
                     onChange={(e) => handleChange('customFooterText', e.target.value)}
-                    placeholder="Tulis pesan ucapan terima kasih atau garansi keaslian sepatu..."
+                    placeholder="Enter thank you message or footwear authenticity guarantees..."
                     className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white text-slate-800"
                   />
                 </div>
@@ -318,32 +317,32 @@ export default function SettingsModule({
                     id="showLogo"
                     checked={form.showLogoOnReceipt}
                     onChange={(e) => handleChange('showLogoOnReceipt', e.target.checked)}
-                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300"
+                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 cursor-pointer"
                   />
                   <label htmlFor="showLogo" className="font-medium text-slate-700 text-xs cursor-pointer">
-                    Cetak Logo & Ikon Footwear di Bagian Atas Nota
+                    Print Brand Logo & Footwear Icons on Top of Receipt
                   </label>
                 </div>
               </div>
             )}
 
-            {/* TAB 3: Pajak & Keuangan */}
+            {/* TAB 3: Taxes & Policies */}
             {activeSubTab === 'financial' && (
               <div className="space-y-4 animate-in fade-in-50 duration-150">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Mata Uang</label>
+                    <label className="block font-semibold text-slate-700 mb-1">Currency Standard</label>
                     <input
                       type="text"
                       disabled
-                      value="IDR - Indonesian Rupiah (Rp)"
-                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-100 text-slate-500 font-medium"
+                      value="USD - United States Dollar ($)"
+                      className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-100 text-slate-600 font-semibold"
                     />
                   </div>
 
                   <div>
                     <label className="block font-semibold text-slate-700 mb-1">
-                      Tarif PPN Default (%)
+                      Default Sales Tax (%)
                     </label>
                     <div className="flex items-center gap-2">
                       <input
@@ -354,15 +353,15 @@ export default function SettingsModule({
                         onChange={(e) => handleChange('taxPercentage', parseInt(e.target.value, 10) || 0)}
                         className="w-24 px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white text-slate-800 font-bold text-center"
                       />
-                      <span className="text-slate-500 text-xs">% (0% = Bebas Pajak Ritel)</span>
+                      <span className="text-slate-500 text-xs">% (0% = Tax exempt retail)</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 text-xs space-y-1">
-                  <p className="font-bold text-slate-800">Kebijakan Garansi Keaslian:</p>
+                  <p className="font-bold text-slate-800">Authenticity Guarantee Policy:</p>
                   <p className="text-[11px] text-slate-500">
-                    Toko KICKSMATE menerapkan garansi 100% Original Brand New In Box (BNIB). Pelanggan berhak melakukan otentikasi mandiri.
+                    KICKSMATE guarantees 100% Original Deadstock (DS/BNIB) footwear. Customers are entitled to independent third-party verification (CheckCheck, Legit App).
                   </p>
                 </div>
               </div>
@@ -375,7 +374,7 @@ export default function SettingsModule({
                 className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all shadow-sm shadow-indigo-200 flex items-center gap-2 text-xs cursor-pointer"
               >
                 <Save className="w-4 h-4" />
-                <span>Simpan Pengaturan</span>
+                <span>Save Settings</span>
               </button>
 
               <button
@@ -384,7 +383,7 @@ export default function SettingsModule({
                 className="inline-flex items-center gap-1.5 px-3 py-2 text-rose-600 hover:bg-rose-50 border border-rose-200/80 rounded-xl font-semibold transition-all text-xs cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset Semua Data (Hapus Cache)</span>
+                <span>Reset Demo State (Clear Storage)</span>
               </button>
             </div>
           </form>
@@ -395,15 +394,15 @@ export default function SettingsModule({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Printer className="w-4 h-4 text-indigo-600" />
-              <h3 className="font-bold text-slate-900 text-xs">Pratinjau Struk Thermal Live</h3>
+              <h3 className="font-bold text-slate-900 text-xs">Live Thermal Receipt Preview</h3>
             </div>
             <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700 font-mono">
-              Lebar: {form.paperSize}
+              Width: {form.paperSize}
             </span>
           </div>
 
           <p className="text-[11px] text-slate-500">
-            Perubahan teks di samping langsung di-render pada simulasi kertas thermal ini.
+            Changes made on the left reflect instantly on this simulated thermal printout.
           </p>
 
           {/* Paper receipt container */}
@@ -428,27 +427,27 @@ export default function SettingsModule({
                   {form.address}
                 </p>
                 <p className="text-[9px] text-slate-500 font-sans">
-                  Telp/WA: {form.phone} • {form.instagram}
+                  Tel: {form.phone} • {form.instagram}
                 </p>
               </div>
 
               {/* Meta */}
               <div className="space-y-0.5 text-[9px] pb-2 border-b border-dashed border-slate-300">
                 <div className="flex justify-between">
-                  <span className="text-slate-500">No. Nota:</span>
+                  <span className="text-slate-500">Receipt No:</span>
                   <span className="font-bold">TRX-SAMPLE-01</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Waktu:</span>
-                  <span>25 Sep 2026, 16:30 WIB</span>
+                  <span className="text-slate-500">Date:</span>
+                  <span>Sep 25, 2026, 04:30 PM</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Kasir:</span>
-                  <span>Agung Ota (Kasir 1)</span>
+                  <span className="text-slate-500">Cashier:</span>
+                  <span>Agung Ota (Terminal 1)</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Pelanggan:</span>
-                  <span className="font-bold">Dimas Pratama (VIP)</span>
+                  <span className="text-slate-500">Customer:</span>
+                  <span className="font-bold">Marcus Vance (VIP)</span>
                 </div>
               </div>
 
@@ -456,21 +455,21 @@ export default function SettingsModule({
               <div className="space-y-1.5 py-1 border-b border-dashed border-slate-300">
                 <div className="space-y-0.5">
                   <div className="font-bold leading-tight truncate">
-                    Compass Gazelle Low Black
+                    Air Jordan 1 Retro High OG Chicago
                   </div>
                   <div className="flex justify-between text-slate-500 text-[9px]">
-                    <span>Size 42 • 1 x Rp 489.000</span>
-                    <span className="font-bold text-slate-800">Rp 489.000</span>
+                    <span>EUR 42 • 1 x {formatCurrency(210)}</span>
+                    <span className="font-bold text-slate-800">{formatCurrency(210)}</span>
                   </div>
                 </div>
 
                 <div className="space-y-0.5">
                   <div className="font-bold leading-tight truncate">
-                    Adidas Samba OG White
+                    Adidas Samba OG Core Black
                   </div>
                   <div className="flex justify-between text-slate-500 text-[9px]">
-                    <span>Size 40 • 1 x Rp 1.850.000</span>
-                    <span className="font-bold text-slate-800">Rp 1.850.000</span>
+                    <span>EUR 40 • 1 x {formatCurrency(100)}</span>
+                    <span className="font-bold text-slate-800">{formatCurrency(100)}</span>
                   </div>
                 </div>
               </div>
@@ -479,25 +478,25 @@ export default function SettingsModule({
               <div className="space-y-1 text-[10px] pb-2 border-b border-dashed border-slate-300">
                 <div className="flex justify-between text-slate-500">
                   <span>Subtotal:</span>
-                  <span>Rp 2.339.000</span>
+                  <span>{formatCurrency(310)}</span>
                 </div>
                 <div className="flex justify-between text-rose-600">
-                  <span>Diskon Promo VIP (10%):</span>
-                  <span>-Rp 233.900</span>
+                  <span>VIP Promo Discount (10%):</span>
+                  <span>-{formatCurrency(31)}</span>
                 </div>
                 {form.taxPercentage > 0 && (
                   <div className="flex justify-between text-slate-500">
-                    <span>PPN ({form.taxPercentage}%):</span>
-                    <span>Rp {Math.round((2105100 * form.taxPercentage) / 100).toLocaleString('id-ID')}</span>
+                    <span>Sales Tax ({form.taxPercentage}%):</span>
+                    <span>{formatCurrency(Math.round((279 * form.taxPercentage) / 100))}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-xs font-black text-slate-900 pt-1 border-t border-slate-200">
                   <span>TOTAL:</span>
-                  <span>Rp 2.105.100</span>
+                  <span>{formatCurrency(279)}</span>
                 </div>
                 <div className="flex justify-between text-[9px] pt-1">
-                  <span className="text-slate-500">Metode Bayar:</span>
-                  <span className="font-bold">QRIS STATIC</span>
+                  <span className="text-slate-500">Payment:</span>
+                  <span className="font-bold">APPLE PAY</span>
                 </div>
               </div>
 
@@ -505,9 +504,9 @@ export default function SettingsModule({
               <div className="text-center text-[9px] text-slate-400 font-sans space-y-1 pt-1">
                 <p className="leading-snug">{form.customFooterText}</p>
                 <p className="text-slate-500 font-medium">
-                  Tukar ukuran maksimal {form.returnPolicyDays} hari dengan kondisi belum terpakai.
+                  Size exchange eligible within {form.returnPolicyDays} days in unworn condition.
                 </p>
-                <p className="font-bold text-slate-700 mt-1">Terima Kasih!</p>
+                <p className="font-bold text-slate-700 mt-1">Thank You For Your Visit!</p>
                 <p className="font-mono text-[8px] text-slate-400">{form.website}</p>
               </div>
             </div>

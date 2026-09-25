@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { ShoeProduct } from '@/types';
+import { formatCurrency } from '@/utils/formatters';
 import { X, Printer, Tag, Check, Footprints, QrCode } from 'lucide-react';
 
 interface ShoeBoxLabelModalProps {
@@ -86,7 +87,6 @@ export default function ShoeBoxLabelModal({
 
   const regional = getRegionalSizes(selectedSize);
   const specificSku = `${product.sku}-${selectedSize}`;
-  const formatRupiah = (val: number) => 'Rp ' + val.toLocaleString('id-ID');
 
   const handlePrint = () => {
     window.print();
@@ -103,16 +103,16 @@ export default function ShoeBoxLabelModal({
             </div>
             <div>
               <h2 className="font-extrabold text-sm tracking-tight">
-                Cetak Stiker Label Dus Sepatu
+                Print Shoe Box Barcode Label
               </h2>
               <p className="text-[11px] text-slate-400">
-                Format stiker dus retail box standard (Thermal 70x50mm)
+                Standard sneaker retail box tag format (Thermal 70x50mm)
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -122,7 +122,7 @@ export default function ShoeBoxLabelModal({
         <div className="p-5 bg-slate-50 border-b border-slate-200/80 space-y-4 text-xs">
           <div>
             <label className="block font-bold text-slate-700 mb-1.5">
-              Pilih Ukuran Sepatu (EUR Size):
+              Select Footwear Size (EUR Size):
             </label>
             <div className="flex flex-wrap gap-2">
               {sizesList.map((size) => {
@@ -145,7 +145,7 @@ export default function ShoeBoxLabelModal({
                         isSelected ? 'bg-indigo-700 text-indigo-100' : 'bg-slate-100 text-slate-500'
                       }`}
                     >
-                      {stock} psg
+                      {stock} prs
                     </span>
                   </button>
                 );
@@ -155,7 +155,7 @@ export default function ShoeBoxLabelModal({
 
           <div className="flex items-center justify-between pt-1">
             <div className="flex items-center gap-4">
-              <span className="font-semibold text-slate-600">Model Label:</span>
+              <span className="font-semibold text-slate-600">Label Dimensions:</span>
               <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-700">
                 <input
                   type="radio"
@@ -164,7 +164,7 @@ export default function ShoeBoxLabelModal({
                   onChange={() => setLabelFormat('standard')}
                   className="text-indigo-600 focus:ring-indigo-500"
                 />
-                <span>Standar Kotak Ritel (70x50mm)</span>
+                <span>Standard Retail Box Tag (70x50mm)</span>
               </label>
               <label className="inline-flex items-center gap-1.5 cursor-pointer font-medium text-slate-700">
                 <input
@@ -174,7 +174,7 @@ export default function ShoeBoxLabelModal({
                   onChange={() => setLabelFormat('mini')}
                   className="text-indigo-600 focus:ring-indigo-500"
                 />
-                <span>Ringkas / Hangtag (50x30mm)</span>
+                <span>Compact Hangtag / Polybag (50x30mm)</span>
               </label>
             </div>
           </div>
@@ -183,7 +183,7 @@ export default function ShoeBoxLabelModal({
         {/* Live Label Preview Container */}
         <div className="p-6 bg-slate-200/60 flex flex-col items-center justify-center">
           <p className="text-[11px] font-semibold text-slate-500 mb-2">
-            Pratinjau Hasil Cetak Thermal Stiker Dus:
+            Live Thermal Label Print Preview:
           </p>
 
           {/* Printable Box Sticker Label */}
@@ -259,18 +259,18 @@ export default function ShoeBoxLabelModal({
 
               <div className="text-right shrink-0">
                 <span className="block text-[8px] font-bold text-slate-400 uppercase">
-                  SUGGESTED RETAIL (HET)
+                  SUGGESTED RETAIL PRICE
                 </span>
                 <span className="text-sm font-black font-mono text-slate-900 tracking-tight">
-                  {formatRupiah(product.price)}
+                  {formatCurrency(product.price)}
                 </span>
               </div>
             </div>
 
             {/* Guarantee footer */}
             <div className="mt-2 pt-1.5 border-t border-slate-200 flex items-center justify-between text-[8px] text-slate-400 font-mono">
-              <span>MADE IN INDONESIA • KICKSMATE VAULT</span>
-              <span>VERIFIED ORIGINAL BNIB</span>
+              <span>AUTHENTIC CERTIFIED • KICKSMATE VAULT</span>
+              <span>VERIFIED DEADSTOCK (DS/BNIB)</span>
             </div>
           </div>
         </div>
@@ -278,7 +278,7 @@ export default function ShoeBoxLabelModal({
         {/* Modal Actions */}
         <div className="p-4 bg-white border-t border-slate-100 flex items-center justify-between">
           <div className="text-xs text-slate-500">
-            <span>Stiker siap dikirim ke printer label thermal.</span>
+            <span>Thermal label ready for direct spool to printer.</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -287,7 +287,7 @@ export default function ShoeBoxLabelModal({
               onClick={onClose}
               className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
             >
-              Tutup
+              Close
             </button>
 
             <button
@@ -296,7 +296,7 @@ export default function ShoeBoxLabelModal({
               className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-2 transition-all shadow-sm shadow-indigo-200 cursor-pointer"
             >
               <Printer className="w-4 h-4" />
-              <span>Cetak Label Dus (EUR {selectedSize})</span>
+              <span>Print Box Tag (EUR {selectedSize})</span>
             </button>
           </div>
         </div>

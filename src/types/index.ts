@@ -1,4 +1,4 @@
-export type PaymentStatus = 'Lunas' | 'Menunggu' | 'Diproses' | 'Dibatalkan';
+export type PaymentStatus = 'Paid' | 'Pending' | 'Processing' | 'Cancelled';
 
 export interface OrderItem {
   shoeName: string;
@@ -19,7 +19,7 @@ export interface Order {
   orderDate: string;
   items: OrderItem[];
   totalAmount: number;
-  paymentMethod: 'QRIS' | 'BCA Virtual Account' | 'Mandiri VA' | 'COD' | 'Kartu Kredit';
+  paymentMethod: 'Apple Pay' | 'Credit Card' | 'Cash' | 'Stripe Terminal' | 'Bank Transfer';
   paymentStatus: PaymentStatus;
   shippingCourier: string;
   trackingNumber: string;
@@ -35,6 +35,8 @@ export interface StatItem {
   iconName: 'dollar' | 'shoppingBag' | 'alertTriangle' | 'users';
 }
 
+export type ShoeCategory = 'Sneakers' | 'Running' | 'Casual' | 'Basketball' | 'Formal';
+
 export interface LowStockShoe {
   id: string;
   name: string;
@@ -43,11 +45,9 @@ export interface LowStockShoe {
   size: number;
   stockLeft: number;
   threshold: number;
-  category: 'Sneakers' | 'Formal' | 'Running' | 'Casual';
+  category: ShoeCategory;
   price: number;
 }
-
-export type ShoeCategory = 'Sneakers' | 'Running' | 'Casual' | 'Basketball' | 'Formal';
 
 export interface ShoeProduct {
   id: string;
@@ -55,10 +55,10 @@ export interface ShoeProduct {
   brand: string;
   sku: string;
   category: ShoeCategory;
-  price: number; // Harga jual
-  costPrice: number; // Harga modal
+  price: number; // Retail price ($)
+  costPrice: number; // Cost of Goods Sold / Wholesale cost ($)
   color: string;
-  sizes: Record<number, number>; // Size EUR -> stok, misal { 38: 4, 39: 5, ... }
+  sizes: Record<number, number>; // Size EUR -> stock, e.g. { 38: 4, 39: 5, ... }
   totalStock: number;
   threshold: number;
   image?: string;
@@ -78,6 +78,8 @@ export interface PosCartItem {
   image?: string;
 }
 
+export type PaymentMethod = 'Cash' | 'Apple Pay' | 'Credit Card' | 'Stripe Terminal';
+
 export interface PosTransaction {
   id: string;
   customerName: string;
@@ -89,7 +91,7 @@ export interface PosTransaction {
   subtotal: number;
   discount: number;
   total: number;
-  paymentMethod: 'Tunai' | 'QRIS' | 'Debit BCA' | 'Kartu Kredit';
+  paymentMethod: PaymentMethod;
   cashAmountPaid?: number;
   changeDue?: number;
 }
@@ -104,7 +106,7 @@ export interface Customer {
   city: string;
   tier: CustomerTier;
   points: number;
-  totalSpent: number; // LTV (Lifetime Value)
+  totalSpent: number; // LTV (Lifetime Value in $)
   totalOrders: number;
   preferredSize: number; // EUR
   favoriteBrand: string;
@@ -128,5 +130,3 @@ export interface StoreSettings {
   taxPercentage: number;
   showLogoOnReceipt: boolean;
 }
-
-

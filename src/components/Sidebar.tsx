@@ -24,13 +24,13 @@ interface SidebarProps {
 }
 
 export const menuItems = [
-  { id: 'ringkasan', label: 'Ringkasan', icon: LayoutDashboard, badge: null },
-  { id: 'pos', label: 'Kasir POS', icon: Receipt, badge: 'Kasir' },
-  { id: 'pesanan', label: 'Pesanan', icon: ShoppingBag, badge: '3 Baru' },
-  { id: 'inventaris', label: 'Inventaris', icon: Boxes, badge: 'Stok' },
-  { id: 'analitik', label: 'Laba & Margin', icon: TrendingUp, badge: 'Profit' },
-  { id: 'pelanggan', label: 'Pelanggan', icon: Users, badge: null },
-  { id: 'pengaturan', label: 'Pengaturan', icon: Settings, badge: null },
+  { id: 'ringkasan', label: 'Overview', icon: LayoutDashboard, badge: null },
+  { id: 'pos', label: 'POS Terminal', icon: Receipt, badge: 'Cashier' },
+  { id: 'pesanan', label: 'Orders', icon: ShoppingBag, badge: '3 New' },
+  { id: 'inventaris', label: 'Inventory', icon: Boxes, badge: 'Stock' },
+  { id: 'analitik', label: 'Profit & Margins', icon: TrendingUp, badge: 'Margin' },
+  { id: 'pelanggan', label: 'Customers & VIP', icon: Users, badge: null },
+  { id: 'pengaturan', label: 'Store Settings', icon: Settings, badge: null },
 ];
 
 export default function Sidebar({
@@ -68,15 +68,15 @@ export default function Sidebar({
                   POS
                 </span>
               </div>
-              <p className="text-xs text-slate-500 font-medium">Manajemen Toko Sepatu</p>
+              <p className="text-xs text-slate-500 font-medium">Sneaker Vault Retail OS</p>
             </div>
           </div>
 
           {/* Mobile Close Button */}
           <button
             onClick={() => setIsOpenMobile(false)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 lg:hidden"
-            aria-label="Tutup Menu"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 lg:hidden cursor-pointer"
+            aria-label="Close Menu"
           >
             <X className="w-5 h-5" />
           </button>
@@ -90,10 +90,10 @@ export default function Sidebar({
                 <Store className="w-4 h-4 text-indigo-600" />
               </div>
               <div>
-                <p className="text-xs font-semibold text-slate-800">Outlet Dago Sneakers</p>
+                <p className="text-xs font-semibold text-slate-800">SoHo Flagship Store</p>
                 <div className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <p className="text-[11px] text-slate-500">Toko Aktif • POS Online</p>
+                  <p className="text-[11px] text-slate-500">New York • POS Online</p>
                 </div>
               </div>
             </div>
@@ -104,7 +104,7 @@ export default function Sidebar({
         {/* Navigation Menu */}
         <div className="flex-1 px-4 py-3 overflow-y-auto space-y-1">
           <p className="px-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
-            Menu Utama
+            Main Menu
           </p>
 
           {menuItems.map((item) => {
@@ -117,7 +117,7 @@ export default function Sidebar({
                   setActiveTab(item.id);
                   setIsOpenMobile(false);
                 }}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 ${
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 cursor-pointer ${
                   isActive
                     ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-300 font-semibold'
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80'
@@ -150,16 +150,16 @@ export default function Sidebar({
           })}
         </div>
 
-        {/* Quick Storage Quota / Status Card */}
+        {/* Quick Stock Sync Status Card */}
         <div className="px-5 py-3">
           <div className="p-3.5 rounded-xl bg-gradient-to-br from-indigo-50/60 via-slate-50 to-slate-100 border border-indigo-100/80 text-xs">
             <div className="flex items-center justify-between font-semibold text-slate-800 mb-1">
-              <span>Sinkronisasi Stok Sepatu</span>
-              <span className="text-indigo-600 font-bold">98%</span>
+              <span>Inventory Sync</span>
+              <span className="text-indigo-600 font-bold">99.8%</span>
             </div>
-            <p className="text-[11px] text-slate-500 mb-2">Terhubung ke Marketplace & Kasir Offline</p>
+            <p className="text-[11px] text-slate-500 mb-2">Omnichannel Cloud & In-Store POS</p>
             <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
-              <div className="bg-indigo-600 h-full rounded-full w-[98%]" />
+              <div className="bg-indigo-600 h-full rounded-full w-[99.8%]" />
             </div>
           </div>
         </div>
@@ -170,19 +170,19 @@ export default function Sidebar({
             <div className="flex items-center gap-3">
               <div className="relative">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-slate-800 to-slate-700 text-white font-semibold text-xs flex items-center justify-center shadow-xs">
-                  BO
+                  AO
                 </div>
                 <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
               </div>
               <div className="overflow-hidden">
-                <p className="text-xs font-bold text-slate-900 truncate">Bambang Oetomo</p>
-                <p className="text-[11px] text-slate-500 truncate">Kepala Toko / Admin</p>
+                <p className="text-xs font-bold text-slate-900 truncate">Agung Ota</p>
+                <p className="text-[11px] text-slate-500 truncate">Head of Retail / Admin</p>
               </div>
             </div>
 
             <button
-              title="Keluar"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+              title="Sign Out"
+              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
             </button>

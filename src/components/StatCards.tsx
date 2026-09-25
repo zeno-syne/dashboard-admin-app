@@ -106,7 +106,7 @@ export default function StatCards({ stats, onFilterLowStock }: StatCardsProps) {
               </div>
               {isAlert && (
                 <span className="text-[11px] font-semibold text-amber-600 underline decoration-amber-300 underline-offset-2">
-                  Cek stok &rarr;
+                  Inspect stock &rarr;
                 </span>
               )}
             </div>

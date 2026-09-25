@@ -9,10 +9,9 @@ import {
   Clock,
   RefreshCw,
   XCircle,
-  Filter,
-  ArrowUpDown,
   ShoppingBag,
 } from 'lucide-react';
+import { formatCurrency } from '@/utils/formatters';
 
 interface RecentOrdersTableProps {
   orders: Order[];
@@ -25,12 +24,12 @@ export default function RecentOrdersTable({
   onSelectOrder,
   searchFilter = '',
 }: RecentOrdersTableProps) {
-  const [selectedStatus, setSelectedStatus] = useState<string>('Semua');
+  const [selectedStatus, setSelectedStatus] = useState<string>('All');
 
   // Filter based on active tab and search query
   const filteredOrders = orders.filter((order) => {
     const matchesStatus =
-      selectedStatus === 'Semua' || order.paymentStatus === selectedStatus;
+      selectedStatus === 'All' || order.paymentStatus === selectedStatus;
 
     const query = searchFilter.toLowerCase().trim();
     if (!query) return matchesStatus;
@@ -51,35 +50,35 @@ export default function RecentOrdersTable({
 
   const getStatusBadge = (status: PaymentStatus) => {
     switch (status) {
-      case 'Lunas':
+      case 'Paid':
         return {
+          label: 'Paid',
           bg: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
           dot: 'bg-emerald-500',
           icon: CheckCircle2,
         };
-      case 'Menunggu':
+      case 'Pending':
         return {
+          label: 'Pending',
           bg: 'bg-amber-50 text-amber-700 border-amber-200/80',
           dot: 'bg-amber-500',
           icon: Clock,
         };
-      case 'Diproses':
+      case 'Processing':
         return {
+          label: 'Processing',
           bg: 'bg-blue-50 text-blue-700 border-blue-200/80',
           dot: 'bg-blue-500',
           icon: RefreshCw,
         };
-      case 'Dibatalkan':
+      case 'Cancelled':
         return {
+          label: 'Cancelled',
           bg: 'bg-rose-50 text-rose-700 border-rose-200/80',
           dot: 'bg-rose-500',
           icon: XCircle,
         };
     }
-  };
-
-  const formatRupiah = (num: number) => {
-    return 'Rp ' + num.toLocaleString('id-ID');
   };
 
   const getInitials = (name: string) => {
@@ -91,7 +90,7 @@ export default function RecentOrdersTable({
       .toUpperCase();
   };
 
-  const filterTabs = ['Semua', 'Lunas', 'Menunggu', 'Diproses', 'Dibatalkan'];
+  const filterTabs = ['All', 'Paid', 'Pending', 'Processing', 'Cancelled'];
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
@@ -99,65 +98,57 @@ export default function RecentOrdersTable({
       <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-base font-bold text-slate-900">Pesanan Terbaru</h3>
-            <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
-              {filteredOrders.length} Transaksi
+            <h3 className="font-extrabold text-slate-900 text-base">Recent Orders</h3>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+              {filteredOrders.length} transactions
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            Daftar pembelian sepatu dari toko fisik dan marketplace
+            Real-time feed from SoHo flagship store terminal and online digital vault.
           </p>
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100/80 rounded-xl overflow-x-auto max-w-full">
-          <Filter className="w-3.5 h-3.5 text-slate-400 ml-2 mr-1 shrink-0 hidden sm:block" />
-          {filterTabs.map((tab) => {
-            const isActive = selectedStatus === tab;
-            return (
-              <button
-                key={tab}
-                onClick={() => setSelectedStatus(tab)}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all whitespace-nowrap ${
-                  isActive
-                    ? 'bg-white text-slate-900 shadow-2xs font-bold'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-                }`}
-              >
-                {tab}
-              </button>
-            );
-          })}
+        <div className="flex items-center gap-1.5 bg-slate-100/80 p-1 rounded-xl text-xs font-medium w-full sm:w-auto overflow-x-auto">
+          {filterTabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setSelectedStatus(tab)}
+              className={`px-3 py-1.5 rounded-lg transition-all whitespace-nowrap cursor-pointer ${
+                selectedStatus === tab
+                  ? 'bg-white text-indigo-600 font-semibold shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Table Element */}
+      {/* Orders Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-slate-50/70 border-b border-slate-100 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              <th className="py-3 px-5">ID Pesanan</th>
-              <th className="py-3 px-5">Pelanggan</th>
-              <th className="py-3 px-5">Produk Sepatu</th>
-              <th className="py-3 px-5">
-                <div className="flex items-center gap-1 cursor-pointer hover:text-slate-700">
-                  <span>Total Tagihan</span>
-                  <ArrowUpDown className="w-3 h-3" />
-                </div>
-              </th>
-              <th className="py-3 px-5">Status Pembayaran</th>
-              <th className="py-3 px-5 text-right">Aksi</th>
+        <table className="w-full text-left text-xs">
+          <thead className="bg-slate-50/80 text-slate-500 font-semibold border-b border-slate-200/80">
+            <tr>
+              <th className="py-3.5 px-4 font-semibold">Order ID & Date</th>
+              <th className="py-3.5 px-4 font-semibold">Customer</th>
+              <th className="py-3.5 px-4 font-semibold">Sneaker Item</th>
+              <th className="py-3.5 px-4 font-semibold text-right">Total Amount</th>
+              <th className="py-3.5 px-4 font-semibold">Payment & Status</th>
+              <th className="py-3.5 px-4 font-semibold">Fulfillment</th>
+              <th className="py-3.5 px-4 font-semibold text-right">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 text-sm">
+          <tbody className="divide-y divide-slate-100 text-slate-700">
             {filteredOrders.length === 0 ? (
               <tr>
-                <td colSpan={6} className="py-12 text-center">
-                  <div className="flex flex-col items-center justify-center text-slate-400">
-                    <ShoppingBag className="w-10 h-10 mb-2 stroke-[1.5] text-slate-300" />
-                    <p className="font-semibold text-slate-700 text-sm">Tidak ada pesanan ditemukan</p>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      Coba ganti filter status atau kata kunci pencarian Anda
+                <td colSpan={7} className="py-12 text-center text-slate-400">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <ShoppingBag className="w-8 h-8 text-slate-300" />
+                    <p className="font-medium text-slate-600">No orders found</p>
+                    <p className="text-[11px] text-slate-400">
+                      Try adjusting your status filter or search query.
                     </p>
                   </div>
                 </td>
@@ -165,63 +156,65 @@ export default function RecentOrdersTable({
             ) : (
               filteredOrders.map((order) => {
                 const badge = getStatusBadge(order.paymentStatus);
-                const firstItem = order.items[0];
-                const extraItemsCount = order.items.length - 1;
+                const BadgeIcon = badge.icon;
+                const primaryItem = order.items[0];
+                const otherItemsCount = order.items.length - 1;
 
                 return (
                   <tr
                     key={order.id}
                     onClick={() => onSelectOrder(order)}
-                    className="hover:bg-indigo-50/20 transition-colors cursor-pointer group"
+                    className="hover:bg-slate-50/80 cursor-pointer transition-colors group"
                   >
-                    {/* ID & Date */}
-                    <td className="py-4 px-5">
-                      <div className="font-mono font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                    {/* Order ID & Date */}
+                    <td className="py-4 px-4 whitespace-nowrap">
+                      <div className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors font-mono">
                         {order.id}
                       </div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">
-                        {order.orderDate}
-                      </div>
+                      <div className="text-[11px] text-slate-400 mt-0.5">{order.orderDate}</div>
                     </td>
 
                     {/* Customer */}
-                    <td className="py-4 px-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center shrink-0">
+                    <td className="py-4 px-4">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-full bg-slate-100 text-slate-700 font-bold text-[10px] flex items-center justify-center shrink-0 border border-slate-200">
                           {getInitials(order.customerName)}
                         </div>
-                        <div>
-                          <p className="font-semibold text-slate-900 leading-tight">
+                        <div className="min-w-0">
+                          <p className="font-semibold text-slate-900 truncate">
                             {order.customerName}
                           </p>
-                          <p className="text-xs text-slate-400 mt-0.5">
+                          <p className="text-[11px] text-slate-400 truncate">
                             {order.customerCity}
                           </p>
                         </div>
                       </div>
                     </td>
 
-                    {/* Shoe Product */}
-                    <td className="py-4 px-5">
-                      <div className="flex items-center gap-2.5">
-                        <ShoeImage
-                          src={firstItem.image}
-                          alt={firstItem.shoeName}
-                          size="sm"
-                          brand={firstItem.brand}
-                          className="w-10 h-10 rounded-lg shrink-0"
-                        />
-                        <div className="min-w-0">
-                          <div className="font-semibold text-slate-800 line-clamp-1">
-                            {firstItem.shoeName}
-                          </div>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="inline-block px-1.5 py-0.2 bg-slate-100 text-slate-700 font-mono tabular-nums font-bold rounded text-[11px]">
-                              Size {firstItem.size}
+                    {/* Sneaker Item */}
+                    <td className="py-4 px-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-slate-200 shadow-2xs">
+                          <ShoeImage
+                            src={primaryItem.image}
+                            alt={primaryItem.shoeName}
+                            brand={primaryItem.brand}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          />
+                        </div>
+                        <div className="min-w-0 max-w-[200px]">
+                          <p className="font-semibold text-slate-900 truncate leading-tight">
+                            {primaryItem.shoeName}
+                          </p>
+                          <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-500">
+                            <span className="font-mono font-bold text-slate-700">
+                              EUR {primaryItem.size}
                             </span>
-                            {extraItemsCount > 0 && (
-                              <span className="text-[11px] font-semibold text-indigo-600 bg-indigo-50 px-1.5 py-0.2 rounded">
-                                +{extraItemsCount} sepatu lainnya
+                            <span>•</span>
+                            <span>Qty {primaryItem.quantity}</span>
+                            {otherItemsCount > 0 && (
+                              <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1 rounded">
+                                +{otherItemsCount} more
                               </span>
                             )}
                           </div>
@@ -229,37 +222,47 @@ export default function RecentOrdersTable({
                       </div>
                     </td>
 
-                    {/* Amount & Payment Method */}
-                    <td className="py-4 px-5">
-                      <div className="font-mono tabular-nums font-bold text-slate-900">
-                        {formatRupiah(order.totalAmount)}
-                      </div>
-                      <div className="text-[11px] text-slate-500 font-medium mt-0.5">
-                        {order.paymentMethod}
-                      </div>
-                    </td>
-
-                    {/* Payment Status */}
-                    <td className="py-4 px-5">
-                      <span
-                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${badge.bg}`}
-                      >
-                        <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`}></span>
-                        <span>{order.paymentStatus}</span>
+                    {/* Total Amount */}
+                    <td className="py-4 px-4 text-right whitespace-nowrap">
+                      <span className="font-bold text-slate-900 font-mono tabular-nums text-sm">
+                        {formatCurrency(order.totalAmount)}
                       </span>
                     </td>
 
-                    {/* Actions */}
-                    <td className="py-4 px-5 text-right">
+                    {/* Payment & Status */}
+                    <td className="py-4 px-4 whitespace-nowrap">
+                      <div className="space-y-1">
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${badge.bg}`}
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`}></span>
+                          <span>{badge.label}</span>
+                        </span>
+                        <div className="text-[10px] text-slate-400">{order.paymentMethod}</div>
+                      </div>
+                    </td>
+
+                    {/* Fulfillment */}
+                    <td className="py-4 px-4 whitespace-nowrap">
+                      <div className="font-medium text-slate-800 text-[11px]">
+                        {order.shippingCourier}
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-mono mt-0.5">
+                        {order.trackingNumber}
+                      </div>
+                    </td>
+
+                    {/* Action */}
+                    <td className="py-4 px-4 text-right whitespace-nowrap">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           onSelectOrder(order);
                         }}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 bg-white text-xs font-semibold hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-2xs"
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 font-semibold transition-all cursor-pointer"
                       >
                         <Eye className="w-3.5 h-3.5" />
-                        <span>Detail</span>
+                        <span>Details</span>
                       </button>
                     </td>
                   </tr>
@@ -268,18 +271,6 @@ export default function RecentOrdersTable({
             )}
           </tbody>
         </table>
-      </div>
-
-      {/* Table Footer / Summary */}
-      <div className="p-4 px-5 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-2">
-        <p>
-          Menampilkan <span className="font-semibold text-slate-800">{filteredOrders.length}</span> dari{' '}
-          <span className="font-semibold text-slate-800">{orders.length}</span> pesanan terbaru
-        </p>
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span>Data terintegrasi real-time</span>
-        </div>
       </div>
     </div>
   );

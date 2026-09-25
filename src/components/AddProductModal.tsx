@@ -18,21 +18,21 @@ export default function AddProductModal({
   onAddProduct,
 }: AddProductModalProps) {
   const [name, setName] = useState('');
-  const [brand, setBrand] = useState('Sepatu Compass');
+  const [brand, setBrand] = useState('Nike');
   const [category, setCategory] = useState<ShoeCategory>('Sneakers');
   const [sku, setSku] = useState('');
   const [color, setColor] = useState('');
-  const [price, setPrice] = useState('550000');
-  const [costPrice, setCostPrice] = useState('380000');
+  const [price, setPrice] = useState('140');
+  const [costPrice, setCostPrice] = useState('85');
   const [threshold, setThreshold] = useState('3');
   const [sizeStock, setSizeStock] = useState<Record<number, number>>({
     38: 3,
     39: 4,
     40: 6,
     41: 5,
-    42: 4,
-    43: 2,
-    44: 1,
+    42: 6,
+    43: 3,
+    44: 2,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -71,13 +71,13 @@ export default function AddProductModal({
       brand,
       sku: finalSku,
       category,
-      price: parseInt(price, 10) || 0,
-      costPrice: parseInt(costPrice, 10) || 0,
+      price: parseFloat(price) || 0,
+      costPrice: parseFloat(costPrice) || 0,
       color: color.trim() || 'Standard Edition',
       sizes: sizeStock,
       totalStock: totalCalculatedStock,
       threshold: parseInt(threshold, 10) || 3,
-      image: '👟',
+      image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=500&q=80',
       createdAt: new Date().toISOString().split('T')[0],
     };
 
@@ -102,13 +102,14 @@ export default function AddProductModal({
               <Plus className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900 text-sm">Tambah Model Sepatu Baru</h3>
-              <p className="text-[11px] text-slate-500">Daftarkan SKU dan stok ukuran ke inventaris</p>
+              <h3 className="font-bold text-slate-900 text-sm">Register New Sneaker Model</h3>
+              <p className="text-[11px] text-slate-500">Add SKU and EUR size run into active catalog</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
@@ -119,14 +120,14 @@ export default function AddProductModal({
           {/* Shoe Name */}
           <div>
             <label className="block font-semibold text-slate-700 mb-1">
-              Nama Model Sepatu <span className="text-rose-500">*</span>
+              Sneaker Model Name <span className="text-rose-500">*</span>
             </label>
             <input
               type="text"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Contoh: Compass Retrograde Low Black White"
+              placeholder="e.g. New Balance 990v6 Grey"
               className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800"
             />
           </div>
@@ -134,35 +135,33 @@ export default function AddProductModal({
           {/* Brand & Category */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Brand / Merk</label>
+              <label className="block font-semibold text-slate-700 mb-1">Brand</label>
               <select
                 value={brand}
                 onChange={(e) => setBrand(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 bg-white"
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 bg-white cursor-pointer"
               >
-                <option value="Sepatu Compass">Sepatu Compass</option>
-                <option value="Ventela">Ventela</option>
-                <option value="Aerostreet">Aerostreet</option>
-                <option value="Patrobas">Patrobas</option>
                 <option value="Nike">Nike</option>
                 <option value="Adidas">Adidas</option>
                 <option value="New Balance">New Balance</option>
                 <option value="Asics">Asics</option>
+                <option value="Salomon">Salomon</option>
+                <option value="Jordan">Jordan</option>
                 <option value="Puma">Puma</option>
                 <option value="Converse">Converse</option>
               </select>
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Kategori</label>
+              <label className="block font-semibold text-slate-700 mb-1">Category</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as ShoeCategory)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 bg-white"
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 bg-white cursor-pointer"
               >
                 <option value="Sneakers">Sneakers</option>
-                <option value="Casual">Casual</option>
                 <option value="Running">Running</option>
+                <option value="Casual">Casual</option>
                 <option value="Basketball">Basketball</option>
                 <option value="Formal">Formal</option>
               </select>
@@ -173,11 +172,11 @@ export default function AddProductModal({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <div className="flex items-center justify-between mb-1">
-                <label className="font-semibold text-slate-700">Kode SKU Gudang</label>
+                <label className="font-semibold text-slate-700">Inventory SKU</label>
                 <button
                   type="button"
                   onClick={generateSku}
-                  className="text-[10px] text-indigo-600 hover:text-indigo-800 flex items-center gap-1 font-semibold"
+                  className="text-[10px] text-indigo-600 hover:text-indigo-800 flex items-center gap-1 font-semibold cursor-pointer"
                 >
                   <Sparkles className="w-2.5 h-2.5" />
                   Auto-SKU
@@ -187,48 +186,50 @@ export default function AddProductModal({
                 type="text"
                 value={sku}
                 onChange={(e) => setSku(e.target.value)}
-                placeholder="Misal: CMP-RET-BLK"
-                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 uppercase"
+                placeholder="e.g. NB-990-GRY"
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 uppercase font-mono"
               />
             </div>
 
             <div>
-              <label className="block font-semibold text-slate-700 mb-1">Varian Warna</label>
+              <label className="block font-semibold text-slate-700 mb-1">Colorway</label>
               <input
                 type="text"
                 value={color}
                 onChange={(e) => setColor(e.target.value)}
-                placeholder="Contoh: Black / Off-White"
+                placeholder="e.g. Grey / Castlerock"
                 className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800"
               />
             </div>
           </div>
 
-          {/* Pricing: Cost & Retail */}
+          {/* Pricing: Wholesale Cost & Retail Price ($) */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block font-semibold text-slate-700 mb-1">
-                Harga Modal / Beli (Rp)
+                Wholesale Cost Price ($)
               </label>
               <input
                 type="number"
+                step="any"
                 required
                 value={costPrice}
                 onChange={(e) => setCostPrice(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800"
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-mono"
               />
             </div>
 
             <div>
               <label className="block font-semibold text-slate-700 mb-1">
-                Harga Jual Retail (Rp) <span className="text-rose-500">*</span>
+                Retail Price ($) <span className="text-rose-500">*</span>
               </label>
               <input
                 type="number"
+                step="any"
                 required
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-semibold"
+                className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 font-semibold font-mono"
               />
             </div>
           </div>
@@ -237,22 +238,22 @@ export default function AddProductModal({
           <div className="pt-2 border-t border-slate-100">
             <div className="flex items-center justify-between mb-2">
               <label className="font-semibold text-slate-700">
-                Alokasi Stok Awal per Ukuran (EUR)
+                Initial Stock Allocation (EUR)
               </label>
-              <span className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">
-                Total: {totalCalculatedStock} Pasang
+              <span className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100 font-mono">
+                Total: {totalCalculatedStock} pairs
               </span>
             </div>
             <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
               {SIZES_LIST.map((sz) => (
                 <div key={sz} className="text-center">
-                  <span className="block text-[10px] font-bold text-slate-500 mb-1">EUR {sz}</span>
+                  <span className="block text-[10px] font-bold text-slate-500 mb-1 font-mono">EUR {sz}</span>
                   <input
                     type="number"
                     min="0"
                     value={sizeStock[sz] || 0}
                     onChange={(e) => handleSizeStockChange(sz, e.target.value)}
-                    className="w-full text-center py-1.5 font-bold text-slate-800 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-xs bg-slate-50/60"
+                    className="w-full text-center py-1.5 font-bold text-slate-800 border border-slate-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-xs bg-slate-50/60 font-mono"
                   />
                 </div>
               ))}
@@ -261,7 +262,7 @@ export default function AddProductModal({
 
           {/* Min threshold */}
           <div className="pt-1 flex items-center justify-between text-slate-600">
-            <span className="text-[11px]">Batas Peringatan Stok Menipis</span>
+            <span className="text-[11px]">Low Stock Warning Threshold</span>
             <div className="flex items-center gap-1.5">
               <input
                 type="number"
@@ -269,9 +270,9 @@ export default function AddProductModal({
                 max="20"
                 value={threshold}
                 onChange={(e) => setThreshold(e.target.value)}
-                className="w-14 text-center py-1 text-xs border border-slate-200 rounded-lg bg-white"
+                className="w-14 text-center py-1 text-xs border border-slate-200 rounded-lg bg-white font-mono"
               />
-              <span className="text-[11px] text-slate-400">pasang/ukuran</span>
+              <span className="text-[11px] text-slate-400">pairs/size</span>
             </div>
           </div>
 
@@ -280,21 +281,21 @@ export default function AddProductModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold rounded-xl transition-all"
+              className="flex-1 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold rounded-xl transition-all cursor-pointer"
             >
-              Batal
+              Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-all shadow-sm shadow-indigo-200 flex items-center justify-center gap-2"
+              className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-all shadow-sm shadow-indigo-200 flex items-center justify-center gap-2 cursor-pointer"
             >
               {isSubmitting ? (
-                <span>Menyimpan ke Gudang...</span>
+                <span>Registering to Catalog...</span>
               ) : (
                 <>
                   <PackageCheck className="w-4 h-4" />
-                  <span>Daftarkan Produk</span>
+                  <span>Register Sneaker</span>
                 </>
               )}
             </button>

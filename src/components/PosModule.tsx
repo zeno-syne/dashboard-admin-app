@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { ShoeProduct, PosCartItem, PosTransaction } from '@/types';
+import { ShoeProduct, PosCartItem, PosTransaction, PaymentMethod } from '@/types';
 import ShoeImage from '@/components/ShoeImage';
+import { formatCurrency } from '@/utils/formatters';
 import {
   Search,
   ShoppingCart,
@@ -35,14 +36,14 @@ const AVAILABLE_SIZES = [38, 39, 40, 41, 42, 43, 44];
 export default function PosModule({ products, onCompleteTransaction }: PosModuleProps) {
   // Catalogue Search and Filter
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedBrand, setSelectedBrand] = useState('Semua');
-  const [selectedCategory, setSelectedCategory] = useState('Semua');
+  const [selectedBrand, setSelectedBrand] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState('All');
 
   // Transaction / Cart state
   const [cart, setCart] = useState<PosCartItem[]>([]);
-  const [customerName, setCustomerName] = useState('Pelanggan Walk-In');
+  const [customerName, setCustomerName] = useState('Walk-in Customer');
   const [customerPhone, setCustomerPhone] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'Tunai' | 'QRIS' | 'Debit BCA' | 'Kartu Kredit'>('Tunai');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('Cash');
   const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [cashAmountInput, setCashAmountInput] = useState<string>('');
 
@@ -56,8 +57,6 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
   const [animatingKey, setAnimatingKey] = useState<string | null>(null);
   const [cartBounced, setCartBounced] = useState<boolean>(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
-
-  const formatRupiah = (val: number) => 'Rp ' + val.toLocaleString('id-ID');
 
   // Crisp high-pitch beep for barcode scan success (laser scanner sound)
   const playBarcodeScanSuccess = () => {
@@ -121,7 +120,7 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
 
   // Unique Brands
   const brandsList = useMemo(() => {
-    return ['Semua', ...Array.from(new Set(products.map((p) => p.brand)))];
+    return ['All', ...Array.from(new Set(products.map((p) => p.brand)))];
   }, [products]);
 
   // Filtered Products
@@ -131,8 +130,8 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.brand.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchBrand = selectedBrand === 'Semua' || p.brand === selectedBrand;
-      const matchCategory = selectedCategory === 'Semua' || p.category === selectedCategory;
+      const matchBrand = selectedBrand === 'All' || p.brand === selectedBrand;
+      const matchCategory = selectedCategory === 'All' || p.category === selectedCategory;
       return matchQuery && matchBrand && matchCategory;
     });
   }, [products, searchQuery, selectedBrand, selectedCategory]);
@@ -219,7 +218,7 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
 
     if (!matchedProduct) {
       setBarcodeFeedback({
-        message: `Barcode "${raw}" tidak terdaftar dalam inventaris sepatu.`,
+        message: `Barcode "${raw}" not registered in sneaker inventory.`,
         isError: true,
       });
       setTimeout(() => setBarcodeFeedback(null), 4000);
@@ -238,7 +237,7 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
     const availableStock = matchedProduct.sizes[finalSize] || 0;
     if (availableStock <= 0) {
       setBarcodeFeedback({
-        message: `Stok ${matchedProduct.name} ukuran EUR ${finalSize} saat ini HABIS.`,
+        message: `Stock for ${matchedProduct.name} (EUR ${finalSize}) is currently SOLD OUT.`,
         isError: true,
       });
       setTimeout(() => setBarcodeFeedback(null), 4000);
@@ -249,7 +248,7 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
     handleAddToCart(matchedProduct, finalSize);
     playBarcodeScanSuccess();
     setBarcodeFeedback({
-      message: `Berhasil Scan: ${matchedProduct.name} (EUR ${finalSize}) masuk kasir!`,
+      message: `Scanned: ${matchedProduct.name} (EUR ${finalSize}) added to cart!`,
       isError: false,
     });
     setTimeout(() => setBarcodeFeedback(null), 3500);
@@ -294,9 +293,9 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
   const totalAmount = Math.max(0, subtotal - discountAmount);
 
   // Cash calculation
-  const cashAmountNum = parseInt(cashAmountInput, 10) || 0;
+  const cashAmountNum = parseFloat(cashAmountInput) || 0;
   const changeDue = Math.max(0, cashAmountNum - totalAmount);
-  const isCashSufficient = paymentMethod !== 'Tunai' || cashAmountNum >= totalAmount;
+  const isCashSufficient = paymentMethod !== 'Cash' || cashAmountNum >= totalAmount;
 
   // Quick cash buttons
   const handleQuickCash = (amount: number) => {
@@ -307,33 +306,32 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
   // Submit Transaction
   const handleCheckout = () => {
     if (cart.length === 0) return;
-    if (paymentMethod === 'Tunai' && cashAmountNum < totalAmount) return;
+    if (paymentMethod === 'Cash' && cashAmountNum < totalAmount) return;
 
     const trxId = `TRX-${Date.now().toString().slice(-6)}`;
     const now = new Date();
-    const dateFormatted =
-      now.toLocaleString('id-ID', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      }) + ' WIB';
+    const dateFormatted = now.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
 
     const newTransaction: PosTransaction = {
       id: trxId,
-      customerName: customerName.trim() || 'Pelanggan Walk-In',
+      customerName: customerName.trim() || 'Walk-in Customer',
       customerPhone: customerPhone.trim() || undefined,
-      cashierName: 'Agung Ota (Kasir 1)',
-      branchName: 'KICKSMATE - Outlet Dago Sneakers',
+      cashierName: 'Agung Ota (Terminal 1)',
+      branchName: 'KICKSMATE - SoHo NYC Flagship',
       date: dateFormatted,
       items: [...cart],
       subtotal,
       discount: discountAmount,
       total: totalAmount,
       paymentMethod,
-      cashAmountPaid: paymentMethod === 'Tunai' ? cashAmountNum : totalAmount,
-      changeDue: paymentMethod === 'Tunai' ? changeDue : 0,
+      cashAmountPaid: paymentMethod === 'Cash' ? cashAmountNum : totalAmount,
+      changeDue: paymentMethod === 'Cash' ? changeDue : 0,
     };
 
     onCompleteTransaction(newTransaction);
@@ -350,27 +348,27 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="font-extrabold text-slate-900 text-base tracking-tight">Kasir POS Retail</h2>
+              <h2 className="font-extrabold text-slate-900 text-base tracking-tight">Retail POS Terminal</h2>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 inline-flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                Terminal Aktif
+                Terminal Live
               </span>
             </div>
             <p className="text-xs text-slate-500">
-              Pilih nomor ukuran sepatu untuk menambah ke kasir. Transaksi otomatis memotong stok gudang.
+              Select footwear EUR sizes to add pairs to cart. Inventory updates automatically upon checkout.
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3 text-xs bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200/70 shrink-0">
           <div>
-            <span className="text-slate-400 text-[10px] block">Operator Kasir</span>
+            <span className="text-slate-400 text-[10px] block">Cashier Station</span>
             <span className="font-bold text-slate-800">Agung Ota</span>
           </div>
           <div className="w-px h-6 bg-slate-200" />
           <div>
-            <span className="text-slate-400 text-[10px] block">Cabang</span>
-            <span className="font-bold text-indigo-600">Dago Bandung</span>
+            <span className="text-slate-400 text-[10px] block">Store Location</span>
+            <span className="font-bold text-indigo-600">SoHo Flagship (NYC)</span>
           </div>
         </div>
       </div>
@@ -384,7 +382,7 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <QrCode className="w-4 h-4 text-indigo-400" />
-                <span className="text-xs font-bold tracking-tight">Barcode Scanner POS</span>
+                <span className="text-xs font-bold tracking-tight">POS Barcode Scanner</span>
                 <span className="px-1.5 py-0.5 rounded bg-indigo-500/30 text-indigo-200 text-[10px] font-mono">
                   USB / Laser Ready
                 </span>
@@ -395,7 +393,7 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
                 className="text-[11px] font-semibold text-indigo-300 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>{isBarcodeSimulatorOpen ? 'Tutup Simulator' : '⚡ Simulator Barcode'}</span>
+                <span>{isBarcodeSimulatorOpen ? 'Close Simulator' : '⚡ Barcode Simulator'}</span>
               </button>
             </div>
 
@@ -412,7 +410,7 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
                   type="text"
                   value={barcodeInput}
                   onChange={(e) => setBarcodeInput(e.target.value)}
-                  placeholder="Scan barcode dus sepatu (cth: NKE-AJ1-01-42 lalu tekan Enter)..."
+                  placeholder="Scan shoe box barcode tag (e.g. NKE-AJ1-01-42 then press Enter)..."
                   className="w-full bg-slate-800/90 border border-slate-700 focus:border-indigo-400 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none font-mono"
                 />
               </div>
@@ -420,7 +418,7 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
                 type="submit"
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition-all shadow-xs cursor-pointer shrink-0"
               >
-                Scan Enter
+                Scan SKU
               </button>
             </form>
 
@@ -442,7 +440,7 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
             {isBarcodeSimulatorOpen && (
               <div className="p-3 bg-slate-800/90 border border-slate-700/80 rounded-xl space-y-2 mt-2">
                 <p className="text-[11px] text-slate-300">
-                  Klik tombol <strong>Scan</strong> pada salah satu barcode dus sepatu di bawah untuk mensimulasikan scanner laser:
+                  Click <strong>Scan</strong> on any sample box barcode below to simulate the optical laser scanner:
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1">
                   {products.slice(0, 6).map((p) => {
@@ -483,7 +481,7 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari sneaker (misal: Samba, Compass, Jordan, 550)..."
+                placeholder="Search sneakers (e.g. Chicago, Samba, Jordan, 990v6)..."
                 className="w-full pl-9 pr-14 py-2.5 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 transition-all font-medium"
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] text-slate-400 font-mono bg-white px-1.5 py-0.5 rounded border border-slate-200 pointer-events-none shadow-2xs">
@@ -506,7 +504,7 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
                 </select>
               </div>
 
-              {['Semua', 'Sneakers', 'Running', 'Casual', 'Basketball'].map((cat) => (
+              {['All', 'Sneakers', 'Running', 'Casual', 'Basketball'].map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
@@ -527,9 +525,9 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
             {filteredProducts.length === 0 ? (
               <div className="col-span-full bg-white p-12 rounded-2xl border border-slate-200/80 text-center text-slate-400">
                 <Search className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-                <p className="font-semibold text-slate-700 text-sm">Tidak ada sepatu ditemukan</p>
+                <p className="font-semibold text-slate-700 text-sm">No sneakers found</p>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Coba gunakan kata kunci merk lain atau tekan Escape untuk reset pencarian.
+                  Try adjusting search keywords or press Escape to reset filters.
                 </p>
               </div>
             ) : (
@@ -568,10 +566,10 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
                       {/* Price & Stock Stats */}
                       <div className="mt-2.5 px-0.5 flex items-center justify-between pb-2 border-b border-slate-100">
                         <span className="font-mono tabular-nums font-extrabold text-slate-900 text-sm sm:text-base">
-                          {formatRupiah(prod.price)}
+                          {formatCurrency(prod.price)}
                         </span>
                         <span className="text-[11px] text-slate-500 font-medium">
-                          Stok: <strong className="font-mono tabular-nums text-slate-800">{prod.totalStock}</strong> psg
+                          Stock: <strong className="font-mono tabular-nums text-slate-800">{prod.totalStock}</strong> pairs
                         </span>
                       </div>
                     </div>
@@ -580,9 +578,9 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
                     <div className="mt-3 px-0.5">
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                          Pilih Ukuran (EUR):
+                          Select Size (EUR):
                         </span>
-                        <span className="text-[9px] text-slate-400">Klik untuk masuk kasir</span>
+                        <span className="text-[9px] text-slate-400">Click to add pair</span>
                       </div>
 
                       <div className="grid grid-cols-4 gap-1.5">
@@ -602,8 +600,8 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
                               onClick={() => handleAddToCart(prod, sz)}
                               title={
                                 isOutOfStock
-                                  ? `Size ${sz} Habis`
-                                  : `Klik untuk tambah Size ${sz} ke kasir (Sisa ${stockCount} psg)`
+                                  ? `Size ${sz} Sold Out`
+                                  : `Add Size ${sz} to cart (${stockCount} pairs remaining)`
                               }
                               className={`py-1.5 px-1 rounded-lg text-[10px] font-bold border transition-all text-center flex flex-col items-center justify-center cursor-pointer select-none active:scale-90 ${
                                 isOutOfStock
@@ -627,7 +625,7 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
                                     : 'text-slate-400'
                                 }`}
                               >
-                                {isOutOfStock ? '0' : `${stockCount}p`}
+                                {isOutOfStock ? '0' : `${stockCount} prs`}
                               </span>
                             </button>
                           );
@@ -658,10 +656,10 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
                 <ShoppingCart className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="font-bold text-slate-900 text-sm">Keranjang Transaksi</h3>
+                <h3 className="font-bold text-slate-900 text-sm">Transaction Cart</h3>
                 <p className="text-[11px] text-slate-400 font-mono tabular-nums">
-                  {cart.length} varian sepatu •{' '}
-                  {cart.reduce((a, b) => a + b.quantity, 0)} total pasang
+                  {cart.length} footwear items •{' '}
+                  {cart.reduce((a, b) => a + b.quantity, 0)} total pairs
                 </p>
               </div>
             </div>
@@ -672,7 +670,7 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
                 className="text-[11px] text-rose-600 hover:text-rose-800 font-semibold flex items-center gap-1 transition-colors"
               >
                 <RotateCcw className="w-3 h-3" />
-                Reset
+                Clear
               </button>
             )}
           </div>
@@ -682,13 +680,13 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
             <div>
               <label className="block text-[10px] font-semibold text-slate-500 mb-1 flex items-center gap-1">
                 <User className="w-3 h-3 text-slate-400" />
-                Nama Pelanggan
+                Customer Name
               </label>
               <input
                 type="text"
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
-                placeholder="Walk-In Customer"
+                placeholder="Walk-in Customer"
                 className="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg bg-slate-50 focus:bg-white text-slate-800 font-medium"
               />
             </div>
@@ -696,13 +694,13 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
             <div>
               <label className="block text-[10px] font-semibold text-slate-500 mb-1 flex items-center gap-1">
                 <Phone className="w-3 h-3 text-slate-400" />
-                WhatsApp (Nota Struk)
+                Phone / E-Receipt
               </label>
               <input
                 type="text"
                 value={customerPhone}
                 onChange={(e) => setCustomerPhone(e.target.value)}
-                placeholder="0812-xxxx-xxxx"
+                placeholder="+1 (555) 000-0000"
                 className="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-lg bg-slate-50 focus:bg-white text-slate-800 font-mono"
               />
             </div>
@@ -713,9 +711,9 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
             {cart.length === 0 ? (
               <div className="py-12 text-center text-slate-400">
                 <ShoppingCart className="w-9 h-9 mx-auto mb-2 text-slate-200" />
-                <p className="font-semibold text-slate-700 text-xs">Keranjang Kasir Masih Kosong</p>
+                <p className="font-semibold text-slate-700 text-xs">Cashier Cart is Empty</p>
                 <p className="text-[11px] text-slate-400 mt-1 max-w-[200px] mx-auto">
-                  Pilih nomor ukuran sepatu di katalog kiri untuk memasukkan barang.
+                  Select shoe sizes from the catalog or scan barcodes to begin checkout.
                 </p>
               </div>
             ) : (
@@ -741,7 +739,7 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
                           EUR {item.size}
                         </span>
                         <span className="font-mono tabular-nums text-slate-600">
-                          {formatRupiah(item.price)}
+                          {formatCurrency(item.price)}
                         </span>
                       </div>
                     </div>
@@ -786,11 +784,11 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-[11px] font-semibold text-slate-600 flex items-center gap-1">
                   <Tag className="w-3 h-3 text-indigo-600" />
-                  Diskon Penjualan
+                  Sales Discount
                 </span>
                 {discountPercent > 0 && (
                   <span className="text-[11px] font-mono tabular-nums font-bold text-rose-600">
-                    -{formatRupiah(discountAmount)} ({discountPercent}%)
+                    -{formatCurrency(discountAmount)} ({discountPercent}%)
                   </span>
                 )}
               </div>
@@ -820,85 +818,85 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
           {cart.length > 0 && (
             <div className="pt-2 border-t border-slate-100 space-y-2">
               <label className="block text-[11px] font-semibold text-slate-600">
-                Metode Pembayaran
+                Payment Method
               </label>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <button
                   type="button"
                   onClick={() => {
                     playTactileBeep();
-                    setPaymentMethod('Tunai');
+                    setPaymentMethod('Cash');
                   }}
                   className={`p-2.5 rounded-xl border flex items-center gap-2 font-semibold transition-all ${
-                    paymentMethod === 'Tunai'
+                    paymentMethod === 'Cash'
                       ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700 ring-1 ring-indigo-500 shadow-xs'
                       : 'border-slate-200 hover:bg-slate-50 text-slate-700'
                   }`}
                 >
                   <Banknote className="w-4 h-4 text-emerald-600" />
-                  <span>Tunai (Cash)</span>
+                  <span>Cash (USD)</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => {
                     playTactileBeep();
-                    setPaymentMethod('QRIS');
+                    setPaymentMethod('Apple Pay');
                   }}
                   className={`p-2.5 rounded-xl border flex items-center gap-2 font-semibold transition-all ${
-                    paymentMethod === 'QRIS'
+                    paymentMethod === 'Apple Pay'
                       ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700 ring-1 ring-indigo-500 shadow-xs'
                       : 'border-slate-200 hover:bg-slate-50 text-slate-700'
                   }`}
                 >
                   <QrCode className="w-4 h-4 text-indigo-600" />
-                  <span>QRIS Static</span>
+                  <span>Apple Pay / NFC</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => {
                     playTactileBeep();
-                    setPaymentMethod('Debit BCA');
+                    setPaymentMethod('Stripe Terminal');
                   }}
                   className={`p-2.5 rounded-xl border flex items-center gap-2 font-semibold transition-all ${
-                    paymentMethod === 'Debit BCA'
+                    paymentMethod === 'Stripe Terminal'
                       ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700 ring-1 ring-indigo-500 shadow-xs'
                       : 'border-slate-200 hover:bg-slate-50 text-slate-700'
                   }`}
                 >
                   <CreditCard className="w-4 h-4 text-blue-600" />
-                  <span>EDC / BCA</span>
+                  <span>Stripe Terminal</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => {
                     playTactileBeep();
-                    setPaymentMethod('Kartu Kredit');
+                    setPaymentMethod('Credit Card');
                   }}
                   className={`p-2.5 rounded-xl border flex items-center gap-2 font-semibold transition-all ${
-                    paymentMethod === 'Kartu Kredit'
+                    paymentMethod === 'Credit Card'
                       ? 'border-indigo-600 bg-indigo-50/50 text-indigo-700 ring-1 ring-indigo-500 shadow-xs'
                       : 'border-slate-200 hover:bg-slate-50 text-slate-700'
                   }`}
                 >
                   <CreditCard className="w-4 h-4 text-violet-600" />
-                  <span>Kartu Kredit</span>
+                  <span>Credit Card</span>
                 </button>
               </div>
 
               {/* Cash details input */}
-              {paymentMethod === 'Tunai' && (
+              {paymentMethod === 'Cash' && (
                 <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2 text-xs">
                   <div className="flex items-center justify-between text-[11px] font-semibold text-slate-700">
-                    <span>Uang Diterima</span>
+                    <span>Amount Tendered</span>
                     <button
                       type="button"
                       onClick={() => handleQuickCash(totalAmount)}
                       className="text-indigo-600 hover:underline font-bold"
                     >
-                      Uang Pas
+                      Exact
                     </button>
                   </div>
 
@@ -906,13 +904,13 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
                     type="number"
                     value={cashAmountInput}
                     onChange={(e) => setCashAmountInput(e.target.value)}
-                    placeholder="Masukkan nominal uang..."
+                    placeholder="Enter cash tendered ($)..."
                     className="w-full px-3 py-2 border border-slate-200 rounded-lg bg-white font-mono tabular-nums font-bold text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
 
                   {/* Cash preset quick pills */}
                   <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-                    {[500000, 1000000, 1500000, 2000000, 2500000].map((amt) => {
+                    {[50, 100, 200, 300, 500, 1000].map((amt) => {
                       if (amt < totalAmount) return null;
                       return (
                         <button
@@ -921,7 +919,7 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
                           onClick={() => handleQuickCash(amt)}
                           className="px-2 py-1 bg-white hover:bg-slate-100 border border-slate-200 rounded text-[10px] font-mono tabular-nums font-semibold text-slate-700 shadow-2xs"
                         >
-                          {amt >= 1000000 ? `${amt / 1000000}jt` : `${amt / 1000}rb`}
+                          ${amt}
                         </button>
                       );
                     })}
@@ -930,7 +928,7 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
                   {/* Kembalian calculation status */}
                   {cashAmountNum > 0 && (
                     <div className="pt-2 border-t border-slate-200 flex items-center justify-between font-bold text-xs">
-                      <span>Kembalian:</span>
+                      <span>Change Due:</span>
                       <span
                         className={`font-mono tabular-nums ${
                           cashAmountNum >= totalAmount
@@ -939,8 +937,8 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
                         }`}
                       >
                         {cashAmountNum >= totalAmount
-                          ? formatRupiah(changeDue)
-                          : `Kurang ${formatRupiah(totalAmount - cashAmountNum)}`}
+                          ? formatCurrency(changeDue)
+                          : `Due ${formatCurrency(totalAmount - cashAmountNum)}`}
                       </span>
                     </div>
                   )}
@@ -952,18 +950,18 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
           {/* Pricing Summary with Tabular Typography */}
           <div className="pt-3 border-t border-slate-100 space-y-1.5 text-xs">
             <div className="flex justify-between text-slate-500 font-mono tabular-nums">
-              <span className="font-sans">Subtotal Barang:</span>
-              <span>{formatRupiah(subtotal)}</span>
+              <span className="font-sans">Items Subtotal:</span>
+              <span>{formatCurrency(subtotal)}</span>
             </div>
             {discountAmount > 0 && (
               <div className="flex justify-between text-rose-600 font-mono tabular-nums font-medium">
-                <span className="font-sans">Diskon:</span>
-                <span>-{formatRupiah(discountAmount)}</span>
+                <span className="font-sans">Discount:</span>
+                <span>-{formatCurrency(discountAmount)}</span>
               </div>
             )}
             <div className="flex justify-between items-center pt-2 border-t border-slate-200 text-sm font-extrabold text-slate-900 font-mono tabular-nums">
-              <span className="font-sans font-bold">Total Tagihan:</span>
-              <span className="text-base text-indigo-600 font-black">{formatRupiah(totalAmount)}</span>
+              <span className="font-sans font-bold">Total Due:</span>
+              <span className="text-base text-indigo-600 font-black">{formatCurrency(totalAmount)}</span>
             </div>
           </div>
 
@@ -975,8 +973,8 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
             className="w-full py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-bold rounded-xl transition-all shadow-md shadow-indigo-200 flex items-center justify-center gap-2 text-xs sm:text-sm active:scale-98 cursor-pointer"
           >
             <Receipt className="w-4 h-4" />
-            <span>Selesaikan & Cetak Struk</span>
-            <span className="font-mono tabular-nums">({formatRupiah(totalAmount)})</span>
+            <span>Complete & Print Receipt</span>
+            <span className="font-mono tabular-nums">({formatCurrency(totalAmount)})</span>
           </button>
         </div>
       </div>

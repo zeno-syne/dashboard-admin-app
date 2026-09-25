@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'KICKSMATE - Dashboard Admin & Pantauan Penjualan Toko Sepatu',
-  description: 'UI Dashboard Admin Modern untuk Sistem Manajemen & POS Ritel Toko Sepatu UMKM',
+  title: 'KICKSMATE | Omnichannel Sneaker Vault & Retail POS',
+  description: 'Next-gen retail management, inventory matrix, POS checkout, and financial margin engine for global sneaker boutiques.',
 };
 
 export default function RootLayout({
@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="id"
+      lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans bg-slate-50 text-slate-900">

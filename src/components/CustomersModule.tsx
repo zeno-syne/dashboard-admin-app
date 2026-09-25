@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { Customer, CustomerTier, Order } from '@/types';
 import CustomerDetailModal from '@/components/CustomerDetailModal';
+import { formatCurrency } from '@/utils/formatters';
 import {
   Users,
   Search,
@@ -36,8 +37,8 @@ export default function CustomersModule({
   onUpdateCustomerNotes,
 }: CustomersModuleProps) {
   const [search, setSearch] = useState('');
-  const [selectedTier, setSelectedTier] = useState<string>('Semua');
-  const [selectedSize, setSelectedSize] = useState<string>('Semua');
+  const [selectedTier, setSelectedTier] = useState<string>('All');
+  const [selectedSize, setSelectedSize] = useState<string>('All');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
@@ -45,12 +46,10 @@ export default function CustomersModule({
   const [newName, setNewName] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [newPhone, setNewPhone] = useState('');
-  const [newCity, setNewCity] = useState('Bandung, Jawa Barat');
+  const [newCity, setNewCity] = useState('New York, NY');
   const [newTier, setNewTier] = useState<CustomerTier>('Bronze Member');
   const [newPreferredSize, setNewPreferredSize] = useState('42');
-  const [newFavoriteBrand, setNewFavoriteBrand] = useState('Sepatu Compass');
-
-  const formatRupiah = (val: number) => 'Rp ' + val.toLocaleString('id-ID');
+  const [newFavoriteBrand, setNewFavoriteBrand] = useState('Nike');
 
   // KPI Calculations
   const totalCustomersCount = customers.length;
@@ -70,8 +69,8 @@ export default function CustomersModule({
         c.phone.includes(search) ||
         c.city.toLowerCase().includes(search.toLowerCase());
 
-      const matchTier = selectedTier === 'Semua' || c.tier === selectedTier;
-      const matchSize = selectedSize === 'Semua' || c.preferredSize.toString() === selectedSize;
+      const matchTier = selectedTier === 'All' || c.tier === selectedTier;
+      const matchSize = selectedSize === 'All' || c.preferredSize.toString() === selectedSize;
 
       return matchQuery && matchTier && matchSize;
     });
@@ -105,9 +104,9 @@ export default function CustomersModule({
       totalOrders: 0,
       preferredSize: parseInt(newPreferredSize, 10) || 42,
       favoriteBrand: newFavoriteBrand,
-      joinedDate: 'Hari Ini',
+      joinedDate: 'Today',
       lastPurchaseDate: '-',
-      notes: 'Member baru terdaftar di kasir toko.',
+      notes: 'New member registered at retail terminal.',
     };
 
     onAddCustomer(newCust);
@@ -126,8 +125,8 @@ export default function CustomersModule({
             <Users className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[11px] font-medium text-slate-500">Member Terdaftar</p>
-            <p className="text-lg font-extrabold text-slate-900">{totalCustomersCount} Pelanggan</p>
+            <p className="text-[11px] font-medium text-slate-500">Registered Members</p>
+            <p className="text-lg font-extrabold text-slate-900">{totalCustomersCount} Collectors</p>
           </div>
         </div>
 
@@ -136,9 +135,9 @@ export default function CustomersModule({
             <TrendingUp className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[11px] font-medium text-slate-500">Rata-rata LTV Belanja</p>
+            <p className="text-[11px] font-medium text-slate-500">Average Customer LTV</p>
             <p className="text-base sm:text-lg font-extrabold text-slate-900 font-mono tabular-nums">
-              {formatRupiah(avgLtv)}
+              {formatCurrency(avgLtv)}
             </p>
           </div>
         </div>
@@ -148,8 +147,8 @@ export default function CustomersModule({
             <Crown className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[11px] font-medium text-slate-500">Kolektor VIP & Gold</p>
-            <p className="text-lg font-extrabold text-purple-700">{vipCount} Kolektor</p>
+            <p className="text-[11px] font-medium text-slate-500">VIP & Gold Tier</p>
+            <p className="text-lg font-extrabold text-purple-700">{vipCount} VIP Members</p>
           </div>
         </div>
 
@@ -158,9 +157,9 @@ export default function CustomersModule({
             <Star className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[11px] font-medium text-slate-500">Total Poin Loyalitas</p>
+            <p className="text-[11px] font-medium text-slate-500">Total Loyalty Points</p>
             <p className="text-lg font-extrabold text-amber-600 font-mono tabular-nums">
-              {totalPoints.toLocaleString('id-ID')} Poin
+              {totalPoints.toLocaleString('en-US')} Pts
             </p>
           </div>
         </div>
@@ -170,9 +169,9 @@ export default function CustomersModule({
       <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-base font-bold text-slate-900">Manajemen Pelanggan & Loyalitas</h2>
+            <h2 className="text-base font-bold text-slate-900">Customer Relationship & VIP Vault</h2>
             <p className="text-xs text-slate-500">
-              Kelola database sneakerhead, pantau ukuran sepatu langganan, dan bangun hubungan lewat WhatsApp.
+              Manage global sneakerhead database, track shoe size profiles, and build personalized outreach.
             </p>
           </div>
 
@@ -181,7 +180,7 @@ export default function CustomersModule({
             className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-sm shadow-indigo-200 transition-all shrink-0 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>Daftarkan Member Baru</span>
+            <span>Register New Member</span>
           </button>
         </div>
 
@@ -193,7 +192,7 @@ export default function CustomersModule({
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Cari nama pelanggan, nomor WhatsApp, email..."
+              placeholder="Search customer name, phone number, email, or city..."
               className="w-full pl-9 pr-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800"
             />
           </div>
@@ -204,7 +203,7 @@ export default function CustomersModule({
               onChange={(e) => setSelectedTier(e.target.value)}
               className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white text-slate-700 font-medium"
             >
-              <option value="Semua">Semua Tier Loyalitas</option>
+              <option value="All">All Loyalty Tiers</option>
               <option value="Sneakerhead VIP">Sneakerhead VIP</option>
               <option value="Gold Vault">Gold Vault</option>
               <option value="Silver Collector">Silver Collector</option>
@@ -218,7 +217,7 @@ export default function CustomersModule({
               onChange={(e) => setSelectedSize(e.target.value)}
               className="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl bg-slate-50 focus:bg-white text-slate-700 font-medium"
             >
-              <option value="Semua">Semua Ukuran EUR</option>
+              <option value="All">All EUR Sizes</option>
               {[38, 39, 40, 41, 42, 43, 44].map((sz) => (
                 <option key={sz} value={sz}>
                   Size EUR {sz}
@@ -234,16 +233,16 @@ export default function CustomersModule({
         {filteredCustomers.length === 0 ? (
           <div className="col-span-full bg-white p-12 rounded-2xl border border-slate-200/80 text-center text-slate-400">
             <Users className="w-8 h-8 mx-auto mb-2 text-slate-300" />
-            <p className="font-semibold text-slate-700 text-sm">Tidak ada pelanggan ditemukan</p>
+            <p className="font-semibold text-slate-700 text-sm">No collectors found</p>
             <p className="text-xs text-slate-400 mt-0.5">
-              Coba gunakan kata kunci lain atau reset filter tier dan ukuran.
+              Try adjusting search terms or clearing tier and size filters.
             </p>
           </div>
         ) : (
           filteredCustomers.map((c) => {
             const cleanPhone = c.phone.replace(/[^0-9]/g, '');
-            const waUrl = `https://wa.me/62${cleanPhone.startsWith('0') ? cleanPhone.slice(1) : cleanPhone}?text=${encodeURIComponent(
-              `Halo kak ${c.name}, salam dari KICKSMATE! Ada rilisan sneaker terbaru yang cocok untuk size EUR ${c.preferredSize} kakak.`
+            const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
+              `Hello ${c.name}, greetings from KICKSMATE! We have a fresh sneaker arrival tailored for your EUR ${c.preferredSize} sizing.`
             )}`;
 
             return (
@@ -282,7 +281,7 @@ export default function CustomersModule({
                   <div className="mt-4 p-3 rounded-xl bg-slate-50/80 border border-slate-100 grid grid-cols-2 gap-2 text-xs">
                     <div>
                       <span className="text-[10px] text-slate-400 font-semibold block uppercase">
-                        Ukuran Kaki (EUR)
+                        Foot Size (EUR)
                       </span>
                       <span className="font-mono tabular-nums font-black text-indigo-600 text-xs inline-flex items-center gap-1 mt-0.5">
                         <Footprints className="w-3.5 h-3.5" />
@@ -292,7 +291,7 @@ export default function CustomersModule({
 
                     <div>
                       <span className="text-[10px] text-slate-400 font-semibold block uppercase">
-                        Brand Favorit
+                        Favorite Brand
                       </span>
                       <span className="font-bold text-slate-800 text-xs truncate block mt-0.5">
                         {c.favoriteBrand}
@@ -303,17 +302,17 @@ export default function CustomersModule({
                   {/* Financial LTV & Points */}
                   <div className="mt-3.5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                     <div>
-                      <span className="text-[10px] text-slate-400 block font-medium">Total Belanja</span>
+                      <span className="text-[10px] text-slate-400 block font-medium">Lifetime Spend</span>
                       <span className="font-mono tabular-nums font-extrabold text-slate-900">
-                        {formatRupiah(c.totalSpent)}
+                        {formatCurrency(c.totalSpent)}
                       </span>
                     </div>
 
                     <div className="text-right">
-                      <span className="text-[10px] text-slate-400 block font-medium">Poin Member</span>
+                      <span className="text-[10px] text-slate-400 block font-medium">Reward Points</span>
                       <span className="font-mono tabular-nums font-bold text-amber-600 inline-flex items-center gap-1">
                         <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
-                        {c.points} Poin
+                        {c.points} Pts
                       </span>
                     </div>
                   </div>
@@ -325,17 +324,17 @@ export default function CustomersModule({
                     href={waUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    title="Kirim pesan WhatsApp"
-                    className="p-2 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 transition-colors flex items-center justify-center shrink-0"
+                    title="Send WhatsApp Message"
+                    className="p-2 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 transition-colors flex items-center justify-center shrink-0 cursor-pointer"
                   >
                     <MessageCircle className="w-4 h-4" />
                   </a>
 
                   <button
                     onClick={() => setSelectedCustomer(c)}
-                    className="flex-1 py-2 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-2xs"
+                    className="flex-1 py-2 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
                   >
-                    <span>Lihat Riwayat & Profil</span>
+                    <span>View Profile & History</span>
                   </button>
                 </div>
               </div>
@@ -363,13 +362,13 @@ export default function CustomersModule({
                   <UserCheck className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-sm">Daftarkan Pelanggan Baru</h3>
-                  <p className="text-[11px] text-slate-400">Input data member & preferensi ukuran sepatu</p>
+                  <h3 className="font-bold text-slate-900 text-sm">Register New VIP Member</h3>
+                  <p className="text-[11px] text-slate-400">Input collector profile & footwear sizing preferences</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsAddModalOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -378,14 +377,14 @@ export default function CustomersModule({
             <form onSubmit={handleCreateCustomer} className="p-6 space-y-3.5 text-xs">
               <div>
                 <label className="block font-semibold text-slate-700 mb-1">
-                  Nama Lengkap <span className="text-rose-500">*</span>
+                  Full Name <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
                   required
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  placeholder="Contoh: Budi Santoso"
+                  placeholder="e.g. Marcus Vance"
                   className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800"
                 />
               </div>
@@ -393,14 +392,14 @@ export default function CustomersModule({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block font-semibold text-slate-700 mb-1">
-                    No. WhatsApp <span className="text-rose-500">*</span>
+                    Phone / Mobile <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
                     required
                     value={newPhone}
                     onChange={(e) => setNewPhone(e.target.value)}
-                    placeholder="0812-xxxx-xxxx"
+                    placeholder="+1 (555) 234-5678"
                     className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 font-mono"
                   />
                 </div>
@@ -411,26 +410,26 @@ export default function CustomersModule({
                     type="email"
                     value={newEmail}
                     onChange={(e) => setNewEmail(e.target.value)}
-                    placeholder="budi@gmail.com"
+                    placeholder="marcus@example.com"
                     className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Kota / Domisili</label>
+                <label className="block font-semibold text-slate-700 mb-1">City / Region</label>
                 <input
                   type="text"
                   value={newCity}
                   onChange={(e) => setNewCity(e.target.value)}
-                  placeholder="Bandung, Jawa Barat"
+                  placeholder="New York, NY"
                   className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Ukuran Kaki (EUR)</label>
+                  <label className="block font-semibold text-slate-700 mb-1">Footwear Size (EUR)</label>
                   <select
                     value={newPreferredSize}
                     onChange={(e) => setNewPreferredSize(e.target.value)}
@@ -445,19 +444,18 @@ export default function CustomersModule({
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Brand Favorit</label>
+                  <label className="block font-semibold text-slate-700 mb-1">Favorite Brand</label>
                   <select
                     value={newFavoriteBrand}
                     onChange={(e) => setNewFavoriteBrand(e.target.value)}
                     className="w-full px-3 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-800 bg-white"
                   >
-                    <option value="Sepatu Compass">Sepatu Compass</option>
-                    <option value="Ventela">Ventela</option>
                     <option value="Nike">Nike</option>
-                    <option value="Adidas">Adidas</option>
+                    <option value="Air Jordan">Air Jordan</option>
+                    <option value="Adidas">Adidas Originals</option>
                     <option value="New Balance">New Balance</option>
                     <option value="Asics">Asics</option>
-                    <option value="Patrobas">Patrobas</option>
+                    <option value="Yeezy">Yeezy</option>
                   </select>
                 </div>
               </div>
@@ -466,15 +464,15 @@ export default function CustomersModule({
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="flex-1 py-2.5 border border-slate-200 text-slate-700 font-semibold rounded-xl"
+                  className="flex-1 py-2.5 border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 cursor-pointer"
                 >
-                  Batal
+                  Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm shadow-indigo-200"
+                  className="flex-1 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm shadow-indigo-200 cursor-pointer"
                 >
-                  Daftarkan Member
+                  Save Member
                 </button>
               </div>
             </form>

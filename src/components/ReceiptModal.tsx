@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { PosTransaction, StoreSettings } from '@/types';
+import { formatCurrency } from '@/utils/formatters';
 import { X, Printer, CheckCircle, Share2, Footprints } from 'lucide-react';
 
 interface ReceiptModalProps {
@@ -21,23 +22,21 @@ export default function ReceiptModal({
 }: ReceiptModalProps) {
   if (!isOpen || !transaction) return null;
 
-  const formatRupiah = (val: number) => 'Rp ' + val.toLocaleString('id-ID');
-
   const handlePrint = () => {
     window.print();
   };
 
   const is58mm = settings?.paperSize === '58mm';
   const storeName = settings?.storeName || 'KICKSMATE SNEAKERS';
-  const tagline = settings?.tagline || 'Footwear & Sneakers Vault';
-  const branchName = transaction.branchName || settings?.branchName || 'Outlet Dago Sneakers - Bandung';
-  const address = settings?.address || 'Jl. Ir. H. Juanda No. 102, Dago, Bandung';
-  const phone = settings?.phone || '0812-2299-8801';
-  const instagram = settings?.instagram || '@kicksmate.id';
-  const website = settings?.website || 'kicksmate.id';
+  const tagline = settings?.tagline || 'Footwear & Sneaker Vault';
+  const branchName = transaction.branchName || settings?.branchName || 'SoHo Flagship Store - New York';
+  const address = settings?.address || '524 Broadway, SoHo, New York, NY 10012';
+  const phone = settings?.phone || '+1 (212) 555-0199';
+  const instagram = settings?.instagram || '@kicksmate.nyc';
+  const website = settings?.website || 'kicksmate.com';
   const showLogo = settings?.showLogoOnReceipt ?? true;
-  const returnPolicyDays = settings?.returnPolicyDays ?? 3;
-  const customFooter = settings?.customFooterText || 'Barang yang sudah dibeli dapat ditukar ukuran dalam kondisi belum terpakai.';
+  const returnPolicyDays = settings?.returnPolicyDays ?? 14;
+  const customFooter = settings?.customFooterText || 'Unworn footwear in original packaging eligible for exchange within policy window.';
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
@@ -49,13 +48,13 @@ export default function ReceiptModal({
           <div className="flex items-center gap-2">
             <CheckCircle className="w-5 h-5 shrink-0" />
             <div>
-              <p className="text-xs font-bold">Transaksi Berhasil Disimpan</p>
-              <p className="text-[10px] text-emerald-100">Stok inventaris otomatis terpotong</p>
+              <p className="text-xs font-bold">Transaction Successfully Saved</p>
+              <p className="text-[10px] text-emerald-100">Inventory automatically updated</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-emerald-100 hover:text-white hover:bg-emerald-700/50"
+            className="p-1 rounded-lg text-emerald-100 hover:text-white hover:bg-emerald-700/50 cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -80,25 +79,25 @@ export default function ReceiptModal({
                 {branchName}
               </p>
               <p className="text-[9px] text-slate-400 font-sans">{address}</p>
-              <p className="text-[9px] text-slate-400 font-sans">WA: {phone} • {instagram}</p>
+              <p className="text-[9px] text-slate-400 font-sans">Tel: {phone} • {instagram}</p>
             </div>
 
             {/* Meta info */}
             <div className="space-y-1 text-[10px] pb-2 border-b border-dashed border-slate-300">
               <div className="flex justify-between">
-                <span className="text-slate-500">No. Nota:</span>
+                <span className="text-slate-500">Receipt No:</span>
                 <span className="font-bold text-slate-800">{transaction.id}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Waktu:</span>
+                <span className="text-slate-500">Date:</span>
                 <span>{transaction.date}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Kasir:</span>
+                <span className="text-slate-500">Cashier:</span>
                 <span>{transaction.cashierName}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Pelanggan:</span>
+                <span className="text-slate-500">Customer:</span>
                 <span className="font-semibold text-slate-800">{transaction.customerName}</span>
               </div>
             </div>
@@ -112,10 +111,10 @@ export default function ReceiptModal({
                   </div>
                   <div className="flex justify-between text-slate-500 text-[10px]">
                     <span>
-                      Size {item.size} • {item.quantity} x {formatRupiah(item.price)}
+                      EUR {item.size} • {item.quantity} x {formatCurrency(item.price)}
                     </span>
                     <span className="font-semibold text-slate-800">
-                      {formatRupiah(item.price * item.quantity)}
+                      {formatCurrency(item.price * item.quantity)}
                     </span>
                   </div>
                 </div>
@@ -126,31 +125,31 @@ export default function ReceiptModal({
             <div className="space-y-1 text-[10px] pt-1 pb-2 border-b border-dashed border-slate-300">
               <div className="flex justify-between">
                 <span className="text-slate-500">Subtotal:</span>
-                <span>{formatRupiah(transaction.subtotal)}</span>
+                <span>{formatCurrency(transaction.subtotal)}</span>
               </div>
               {transaction.discount > 0 && (
                 <div className="flex justify-between text-rose-600">
-                  <span>Diskon Promo:</span>
-                  <span>-{formatRupiah(transaction.discount)}</span>
+                  <span>Discount Promo:</span>
+                  <span>-{formatCurrency(transaction.discount)}</span>
                 </div>
               )}
               <div className="flex justify-between text-xs font-bold text-slate-900 pt-1 border-t border-slate-200">
                 <span>TOTAL:</span>
-                <span>{formatRupiah(transaction.total)}</span>
+                <span>{formatCurrency(transaction.total)}</span>
               </div>
               <div className="flex justify-between pt-1">
-                <span className="text-slate-500">Metode Bayar:</span>
+                <span className="text-slate-500">Payment:</span>
                 <span className="font-bold uppercase">{transaction.paymentMethod}</span>
               </div>
-              {transaction.paymentMethod === 'Tunai' && (
+              {transaction.paymentMethod === 'Cash' && (
                 <>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Uang Diterima:</span>
-                    <span>{formatRupiah(transaction.cashAmountPaid || transaction.total)}</span>
+                    <span className="text-slate-500">Amount Tendered:</span>
+                    <span>{formatCurrency(transaction.cashAmountPaid || transaction.total)}</span>
                   </div>
                   <div className="flex justify-between font-bold text-emerald-700">
-                    <span>Kembalian:</span>
-                    <span>{formatRupiah(transaction.changeDue || 0)}</span>
+                    <span>Change Due:</span>
+                    <span>{formatCurrency(transaction.changeDue || 0)}</span>
                   </div>
                 </>
               )}
@@ -158,10 +157,10 @@ export default function ReceiptModal({
 
             {/* Footer remarks */}
             <div className="text-center text-[9px] text-slate-400 font-sans space-y-1 pt-1">
-              <p>Struk ini merupakan bukti pembayaran sah.</p>
+              <p>Official sales invoice & receipt.</p>
               <p>{customFooter}</p>
-              <p>Tukar ukuran max {returnPolicyDays} hari dengan menyertakan struk & kondisi baru.</p>
-              <p className="font-bold text-slate-600 mt-2">Terima kasih atas kunjungan Anda!</p>
+              <p>Size exchange permitted within {returnPolicyDays} days with receipt & original box tag.</p>
+              <p className="font-bold text-slate-600 mt-2">Thank you for visiting KICKSMATE!</p>
               <p className="font-mono text-[8px] text-slate-400">{website}</p>
             </div>
           </div>
@@ -171,10 +170,10 @@ export default function ReceiptModal({
         <div className="p-4 bg-white border-t border-slate-100 flex items-center gap-2 print:hidden">
           <button
             onClick={handlePrint}
-            className="flex-1 py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-sm"
+            className="flex-1 py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-sm cursor-pointer"
           >
             <Printer className="w-4 h-4" />
-            <span>Cetak Struk POS</span>
+            <span>Print POS Receipt</span>
           </button>
 
           <button
@@ -182,9 +181,9 @@ export default function ReceiptModal({
               onNewTransaction();
               onClose();
             }}
-            className="flex-1 py-2.5 px-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-sm shadow-indigo-200"
+            className="flex-1 py-2.5 px-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-sm shadow-indigo-200 cursor-pointer"
           >
-            <span>Transaksi Baru</span>
+            <span>New Sale</span>
           </button>
         </div>
       </div>

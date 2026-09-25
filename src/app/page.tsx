@@ -177,19 +177,19 @@ export default function DashboardPage() {
     if (selectedOrder && selectedOrder.id === orderId) {
       setSelectedOrder((prev) => (prev ? { ...prev, paymentStatus: newStatus } : null));
     }
-    showToast(`Status pesanan ${orderId} berhasil diubah menjadi "${newStatus}"`);
+    showToast(`Order ${orderId} status updated to "${newStatus}"`);
   };
 
   // Product Add handler
   const handleAddProduct = (newProduct: ShoeProduct) => {
     setProducts((prev) => [newProduct, ...prev]);
-    showToast(`Model "${newProduct.name}" berhasil ditambahkan ke inventaris!`);
+    showToast(`Sneaker model "${newProduct.name}" added to inventory!`);
   };
 
   // Product Delete handler
   const handleDeleteProduct = (productId: string) => {
     setProducts((prev) => prev.filter((p) => p.id !== productId));
-    showToast('Produk sepatu berhasil dihapus dari inventaris');
+    showToast('Sneaker model removed from inventory');
   };
 
   // Open Edit Stock Modal
@@ -209,7 +209,7 @@ export default function DashboardPage() {
         return p;
       })
     );
-    showToast('Stok sepatu berhasil diperbarui');
+    showToast('Footwear stock levels successfully updated');
   };
 
   // Quick restock from LowStockWidget (+5 pairs)
@@ -229,26 +229,26 @@ export default function DashboardPage() {
         return p;
       })
     );
-    showToast(`Restock +5 pasang berhasil untuk ukuran ${size}`);
+    showToast(`Restocked +5 pairs successfully for EUR size ${size}`);
   };
 
   // Real CSV Export
   const handleExportCsv = () => {
     const headers = [
-      'ID Pesanan',
-      'Tanggal',
-      'Pelanggan',
-      'Kota',
-      'Metode Pembayaran',
-      'Status Pembayaran',
-      'Kurir / Channel',
-      'Detail Produk (Item)',
-      'Total Transaksi (IDR)',
+      'Order ID',
+      'Date',
+      'Customer',
+      'City / Region',
+      'Payment Method',
+      'Payment Status',
+      'Fulfillment / Courier',
+      'Item Breakdown',
+      'Total Amount ($)',
     ];
 
     const rows = orders.map((o) => {
       const itemsDetail = o.items
-        .map((it) => `${it.shoeName} (Sz ${it.size} x${it.quantity})`)
+        .map((it) => `${it.shoeName} (EUR ${it.size} x${it.quantity})`)
         .join('; ');
       return [
         `"${o.id}"`,
@@ -267,17 +267,17 @@ export default function DashboardPage() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `laporan-penjualan-kicksmate-${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `kicksmate-sales-report-${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
-    showToast('Laporan penjualan riil (CSV) berhasil diunduh!');
+    showToast('Sales report CSV successfully downloaded!');
   };
 
   // Reset to default
   const handleResetDefaultData = () => {
-    if (confirm('Reset semua data kembali ke default (menghapus data lokal)?')) {
+    if (confirm('Reset all store data back to default factory settings (clears local storage)?')) {
       localStorage.removeItem('kicksmate_products');
       localStorage.removeItem('kicksmate_orders');
       localStorage.removeItem('kicksmate_customers');
@@ -286,27 +286,27 @@ export default function DashboardPage() {
       setOrders(mockOrders);
       setCustomers(mockCustomers);
       setSettings(defaultStoreSettings);
-      showToast('Semua data berhasil di-reset ke nilai bawaan pabrik!');
+      showToast('All store data reset to factory default!');
     }
   };
 
   // Settings Save Handler
   const handleSaveSettings = (newSettings: StoreSettings) => {
     setSettings(newSettings);
-    showToast('Pengaturan toko & format printer thermal berhasil disimpan!');
+    showToast('Store settings and thermal receipt template saved!');
   };
 
   // Customer Management Handlers
   const handleAddCustomer = (newCustomer: Customer) => {
     setCustomers((prev) => [newCustomer, ...prev]);
-    showToast(`Pelanggan "${newCustomer.name}" berhasil didaftarkan sebagai member!`);
+    showToast(`Customer "${newCustomer.name}" successfully registered as VIP member!`);
   };
 
   const handleUpdateCustomerNotes = (customerId: string, notes: string) => {
     setCustomers((prev) =>
       prev.map((c) => (c.id === customerId ? { ...c, notes } : c))
     );
-    showToast('Catatan pelanggan berhasil diperbarui!');
+    showToast('Customer notes updated!');
   };
 
   // Handle POS Checkout Completion
@@ -336,10 +336,10 @@ export default function DashboardPage() {
 
     // 2. Map transaction to an Order record
     const paymentMethodMap: Record<string, Order['paymentMethod']> = {
-      'Tunai': 'COD',
-      'QRIS': 'QRIS',
-      'Debit BCA': 'BCA Virtual Account',
-      'Kartu Kredit': 'Kartu Kredit',
+      'Cash': 'Cash',
+      'Apple Pay': 'Apple Pay',
+      'Credit Card': 'Credit Card',
+      'Stripe Terminal': 'Stripe Terminal',
     };
 
     const newOrder: Order = {
@@ -347,15 +347,15 @@ export default function DashboardPage() {
       customerName: transaction.customerName,
       customerEmail: transaction.customerPhone
         ? `${transaction.customerPhone}@pos.local`
-        : 'kasir-offline@kicksmate.id',
-      customerPhone: transaction.customerPhone || '0812-POS-OFFLINE',
-      customerCity: 'Bandung (Toko Fisik)',
+        : 'in-store@kicksmate.com',
+      customerPhone: transaction.customerPhone || '+1 (212) 555-0199',
+      customerCity: 'New York (In-Store POS)',
       orderDate: transaction.date,
       totalAmount: transaction.total,
-      paymentMethod: paymentMethodMap[transaction.paymentMethod] || 'QRIS',
-      paymentStatus: 'Lunas',
-      shippingCourier: 'Kasir Toko (Ambil Langsung)',
-      trackingNumber: `STRUK-${transaction.id}`,
+      paymentMethod: paymentMethodMap[transaction.paymentMethod] || 'Cash',
+      paymentStatus: 'Paid',
+      shippingCourier: 'Boutique POS (Direct Handover)',
+      trackingNumber: `RCPT-${transaction.id}`,
       items: transaction.items.map((i) => ({
         shoeName: i.name,
         brand: i.brand,
@@ -370,7 +370,7 @@ export default function DashboardPage() {
     setOrders((prev) => [newOrder, ...prev]);
 
     // 3. Sync customer points & LTV if member exists
-    if (transaction.customerName && transaction.customerName !== 'Pelanggan Walk-In') {
+    if (transaction.customerName && transaction.customerName !== 'Walk-in Customer') {
       setCustomers((prev) =>
         prev.map((c) => {
           if (
@@ -379,11 +379,11 @@ export default function DashboardPage() {
           ) {
             const newTotalSpent = c.totalSpent + transaction.total;
             const newOrders = c.totalOrders + 1;
-            const pointsEarned = Math.round(transaction.total / 10000);
+            const pointsEarned = Math.round(transaction.total * 1);
             let newTier = c.tier;
-            if (newTotalSpent >= 10000000) newTier = 'Sneakerhead VIP';
-            else if (newTotalSpent >= 4000000) newTier = 'Gold Vault';
-            else if (newTotalSpent >= 1500000) newTier = 'Silver Collector';
+            if (newTotalSpent >= 2500) newTier = 'Sneakerhead VIP';
+            else if (newTotalSpent >= 1200) newTier = 'Gold Vault';
+            else if (newTotalSpent >= 500) newTier = 'Silver Collector';
 
             return {
               ...c,
@@ -391,7 +391,7 @@ export default function DashboardPage() {
               totalOrders: newOrders,
               points: c.points + pointsEarned,
               tier: newTier,
-              lastPurchaseDate: 'Hari Ini',
+              lastPurchaseDate: 'Today',
             };
           }
           return c;
@@ -403,9 +403,9 @@ export default function DashboardPage() {
     const isCurrentlyOffline = isSimulatedOffline || (typeof navigator !== 'undefined' && !navigator.onLine);
     if (isCurrentlyOffline) {
       setOfflineQueue((prev) => [transaction, ...prev]);
-      showToast(`Mode Offline: Transaksi ${transaction.id} tersimpan di antrean lokal!`);
+      showToast(`Offline Mode: Transaction ${transaction.id} saved in local queue!`);
     } else {
-      showToast(`Transaksi kasir ${transaction.id} berhasil dicatat & stok terpotong!`);
+      showToast(`POS Checkout ${transaction.id} processed & inventory updated!`);
     }
 
     // 5. Trigger receipt modal
@@ -423,7 +423,7 @@ export default function DashboardPage() {
     } catch (e) {
       console.error(e);
     }
-    showToast(`Sukses! ${count} transaksi kasir offline berhasil disinkronkan ke cloud.`);
+    showToast(`Success! ${count} offline POS transactions synchronized to cloud.`);
   };
 
   return (
@@ -473,15 +473,15 @@ export default function DashboardPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-                  Pantauan Penjualan & Toko Sepatu
+                  Footwear Retail & Sneaker Vault Operations
                 </h1>
                 <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200/80">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  Live Kasir
+                  Live POS Terminal
                 </span>
               </div>
               <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                Kelola penjualan ritel, kasir POS toko fisik, pantau pembayaran, dan kontrol stok sepatu Anda.
+                Manage retail sales, in-store POS checkouts, real-time inventory matrix, and profit margins.
               </p>
             </div>
 
@@ -491,7 +491,7 @@ export default function DashboardPage() {
                 className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition-all shadow-sm shadow-indigo-200"
               >
                 <Receipt className="w-4 h-4" />
-                <span>Buka Kasir POS</span>
+                <span>Launch POS Terminal</span>
               </button>
 
               <button
@@ -499,7 +499,7 @@ export default function DashboardPage() {
                 className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-all shadow-2xs cursor-pointer"
               >
                 <DownloadCloud className="w-4 h-4 text-slate-500" />
-                <span className="hidden sm:inline">Unduh Laporan (CSV)</span>
+                <span className="hidden sm:inline">Export CSV Report</span>
               </button>
             </div>
           </div>
@@ -508,7 +508,7 @@ export default function DashboardPage() {
           {activeTab === 'ringkasan' && (
             <>
               {/* 4 Stat Cards */}
-              <section aria-label="Statistik Toko">
+              <section aria-label="Store Performance KPIs">
                 <StatCards
                   stats={mockStats}
                   onFilterLowStock={() => setActiveTab('inventaris')}
@@ -529,7 +529,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Recent Orders Table */}
-              <section aria-label="Tabel Pesanan">
+              <section aria-label="Recent Orders Table">
                 <RecentOrdersTable
                   orders={orders}
                   onSelectOrder={(order) => setSelectedOrder(order)}
@@ -550,9 +550,9 @@ export default function DashboardPage() {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900">Manajemen Semua Pesanan</h2>
+                  <h2 className="text-lg font-bold text-slate-900">Order Management & Fulfillment</h2>
                   <p className="text-xs text-slate-500">
-                    Daftar seluruh transaksi yang masuk dari kasir toko fisik, website, dan kurir.
+                    Comprehensive log of omnichannel transactions across in-store POS, boutique vault, and digital channels.
                   </p>
                 </div>
               </div>
