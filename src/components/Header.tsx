@@ -17,6 +17,9 @@ interface HeaderProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   onOpenAddModal?: () => void;
+  isOffline?: boolean;
+  onToggleOffline?: () => void;
+  pendingOfflineCount?: number;
 }
 
 export default function Header({
@@ -24,6 +27,9 @@ export default function Header({
   searchQuery,
   setSearchQuery,
   onOpenAddModal,
+  isOffline = false,
+  onToggleOffline,
+  pendingOfflineCount = 0,
 }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -83,6 +89,29 @@ export default function Header({
 
       {/* Right: Date, Notifications, Quick Action */}
       <div className="flex items-center gap-2 sm:gap-3">
+        {/* Network Online/Offline Status Pill */}
+        {onToggleOffline && (
+          <button
+            type="button"
+            onClick={onToggleOffline}
+            title={isOffline ? 'Koneksi Offline. Klik untuk pulihkan simulasi online.' : 'Koneksi Online (Cloud). Klik untuk simulasi offline.'}
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
+              isOffline
+                ? 'bg-amber-50 text-amber-800 border-amber-300 animate-pulse'
+                : 'bg-emerald-50 text-emerald-700 border-emerald-200/80 hover:bg-emerald-100'
+            }`}
+          >
+            <span
+              className={`w-2 h-2 rounded-full ${
+                isOffline ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse'
+              }`}
+            />
+            <span className="text-[11px]">
+              {isOffline ? `Offline (${pendingOfflineCount} Antrean)` : 'Online (Cloud)'}
+            </span>
+          </button>
+        )}
+
         {/* Date Indicator (hidden on small screens) */}
         <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200/60 text-xs font-medium text-slate-600">
           <Calendar className="w-3.5 h-3.5 text-slate-400" />

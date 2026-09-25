@@ -17,6 +17,7 @@ import ReceiptModal from '@/components/ReceiptModal';
 import CustomersModule from '@/components/CustomersModule';
 import SettingsModule from '@/components/SettingsModule';
 import FinancialAnalyticsModule from '@/components/FinancialAnalyticsModule';
+import PwaOfflineManager from '@/components/PwaOfflineManager';
 import { mockStats, mockOrders, mockProducts, mockCustomers, defaultStoreSettings } from '@/data/mockData';
 import { Order, PaymentStatus, ShoeProduct, LowStockShoe, PosTransaction, Customer, StoreSettings } from '@/types';
 import {
@@ -39,6 +40,8 @@ export default function DashboardPage() {
   const [products, setProducts] = useState<ShoeProduct[]>(mockProducts);
   const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
   const [settings, setSettings] = useState<StoreSettings>(defaultStoreSettings);
+  const [offlineQueue, setOfflineQueue] = useState<PosTransaction[]>([]);
+  const [isSimulatedOffline, setIsSimulatedOffline] = useState<boolean>(false);
   const [isHydrated, setIsHydrated] = useState(false);
   
   // Modals state
@@ -80,6 +83,10 @@ export default function DashboardPage() {
       const savedSettings = localStorage.getItem('kicksmate_settings');
       if (savedSettings) {
         setSettings(JSON.parse(savedSettings));
+      }
+      const savedOfflineQueue = localStorage.getItem('kicksmate_offline_queue');
+      if (savedOfflineQueue) {
+        setOfflineQueue(JSON.parse(savedOfflineQueue));
       }
     } catch (e) {
       console.error('Failed to load from storage', e);
@@ -127,6 +134,16 @@ export default function DashboardPage() {
       }
     }
   }, [settings, isHydrated]);
+
+  useEffect(() => {
+    if (isHydrated) {
+      try {
+        localStorage.setItem('kicksmate_offline_queue', JSON.stringify(offlineQueue));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, [offlineQueue, isHydrated]);
 
   // Derive low stock list dynamically from actual products state
   const dynamicLowStock: LowStockShoe[] = useMemo(() => {
@@ -382,39 +399,72 @@ export default function DashboardPage() {
       );
     }
 
-    // 4. Trigger receipt modal and toast
+    // 4. Handle Offline Queue vs Online Cloud Sync
+    const isCurrentlyOffline = isSimulatedOffline || (typeof navigator !== 'undefined' && !navigator.onLine);
+    if (isCurrentlyOffline) {
+      setOfflineQueue((prev) => [transaction, ...prev]);
+      showToast(`Mode Offline: Transaksi ${transaction.id} tersimpan di antrean lokal!`);
+    } else {
+      showToast(`Transaksi kasir ${transaction.id} berhasil dicatat & stok terpotong!`);
+    }
+
+    // 5. Trigger receipt modal
     setLastTransaction(transaction);
     setIsReceiptOpen(true);
-    showToast(`Transaksi kasir ${transaction.id} berhasil dicatat & stok terpotong!`);
+  };
+
+  // Sync Offline Queue to Cloud
+  const handleSyncOfflineQueue = () => {
+    if (offlineQueue.length === 0) return;
+    const count = offlineQueue.length;
+    setOfflineQueue([]);
+    try {
+      localStorage.removeItem('kicksmate_offline_queue');
+    } catch (e) {
+      console.error(e);
+    }
+    showToast(`Sukses! ${count} transaksi kasir offline berhasil disinkronkan ke cloud.`);
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
-      {/* Toast Notification */}
-      {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2.5 text-xs font-medium animate-in fade-in-50 slide-in-from-bottom-3 duration-200">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
-
-      {/* Left Sidebar */}
-      <Sidebar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        isOpenMobile={isOpenMobile}
-        setIsOpenMobile={setIsOpenMobile}
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      {/* PWA & Offline Connection Manager */}
+      <PwaOfflineManager
+        isSimulatedOffline={isSimulatedOffline}
+        onToggleSimulateOffline={() => setIsSimulatedOffline(!isSimulatedOffline)}
+        pendingOfflineCount={offlineQueue.length}
+        onSyncOfflineQueue={handleSyncOfflineQueue}
       />
 
-      {/* Main Content Area */}
-      <div className="flex-1 lg:pl-72 flex flex-col min-w-0">
-        {/* Top Header */}
-        <Header
-          onOpenMobileMenu={() => setIsOpenMobile(true)}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          onOpenAddModal={() => setIsAddModalOpen(true)}
+      <div className="flex-1 flex">
+        {/* Toast Notification */}
+        {toastMessage && (
+          <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-2.5 text-xs font-medium animate-in fade-in-50 slide-in-from-bottom-3 duration-200">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>{toastMessage}</span>
+          </div>
+        )}
+
+        {/* Left Sidebar */}
+        <Sidebar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          isOpenMobile={isOpenMobile}
+          setIsOpenMobile={setIsOpenMobile}
         />
+
+        {/* Main Content Area */}
+        <div className="flex-1 lg:pl-72 flex flex-col min-w-0">
+          {/* Top Header */}
+          <Header
+            onOpenMobileMenu={() => setIsOpenMobile(true)}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            onOpenAddModal={() => setIsAddModalOpen(true)}
+            isOffline={isSimulatedOffline}
+            onToggleOffline={() => setIsSimulatedOffline(!isSimulatedOffline)}
+            pendingOfflineCount={offlineQueue.length}
+          />
 
         {/* Dashboard Main Container */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
@@ -564,6 +614,7 @@ export default function DashboardPage() {
             />
           )}
         </main>
+      </div>
       </div>
 
       {/* Order Detail Modal */}
