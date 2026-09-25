@@ -310,7 +310,7 @@ export const mockProducts: ShoeProduct[] = [
     sizes: { 38: 4, 39: 5, 40: 6, 41: 3, 42: 2, 43: 0, 44: 1 },
     totalStock: 21,
     threshold: 3,
-    image: '👟',
+    image: 'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?auto=format&fit=crop&w=500&q=80',
     createdAt: '2026-08-10',
   },
   {
@@ -325,7 +325,7 @@ export const mockProducts: ShoeProduct[] = [
     sizes: { 38: 8, 39: 6, 40: 7, 41: 1, 42: 4, 43: 5, 44: 2 },
     totalStock: 33,
     threshold: 3,
-    image: '👟',
+    image: 'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=500&q=80',
     createdAt: '2026-08-12',
   },
   {
@@ -340,7 +340,7 @@ export const mockProducts: ShoeProduct[] = [
     sizes: { 38: 0, 39: 1, 40: 3, 41: 4, 42: 2, 43: 1, 44: 0 },
     totalStock: 11,
     threshold: 2,
-    image: '🏀',
+    image: 'https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=500&q=80',
     createdAt: '2026-08-15',
   },
   {
@@ -355,7 +355,7 @@ export const mockProducts: ShoeProduct[] = [
     sizes: { 38: 2, 39: 4, 40: 3, 41: 5, 42: 6, 43: 4, 44: 2 },
     totalStock: 26,
     threshold: 3,
-    image: '👟',
+    image: 'https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=500&q=80',
     createdAt: '2026-08-18',
   },
   {
@@ -370,7 +370,7 @@ export const mockProducts: ShoeProduct[] = [
     sizes: { 38: 5, 39: 5, 40: 8, 41: 9, 42: 7, 43: 3, 44: 1 },
     totalStock: 38,
     threshold: 3,
-    image: '👟',
+    image: 'https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&w=500&q=80',
     createdAt: '2026-08-20',
   },
   {
@@ -385,7 +385,7 @@ export const mockProducts: ShoeProduct[] = [
     sizes: { 38: 1, 39: 2, 40: 4, 41: 5, 42: 3, 43: 2, 44: 1 },
     totalStock: 18,
     threshold: 2,
-    image: '🏃',
+    image: 'https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?auto=format&fit=crop&w=500&q=80',
     createdAt: '2026-08-25',
   },
   {
@@ -400,7 +400,7 @@ export const mockProducts: ShoeProduct[] = [
     sizes: { 38: 4, 39: 2, 40: 6, 41: 8, 42: 5, 43: 3, 44: 2 },
     totalStock: 30,
     threshold: 3,
-    image: '👟',
+    image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=500&q=80',
     createdAt: '2026-08-28',
   },
   {
@@ -415,7 +415,7 @@ export const mockProducts: ShoeProduct[] = [
     sizes: { 38: 10, 39: 12, 40: 15, 41: 14, 42: 8, 43: 6, 44: 5 },
     totalStock: 70,
     threshold: 5,
-    image: '👟',
+    image: 'https://images.unsplash.com/photo-1607522370275-f14206abe5d3?auto=format&fit=crop&w=500&q=80',
     createdAt: '2026-09-01',
   },
 ];

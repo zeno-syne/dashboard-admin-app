@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Order, PaymentStatus } from '@/types';
+import ShoeImage from '@/components/ShoeImage';
 import {
   Eye,
   CheckCircle2,
@@ -202,14 +203,20 @@ export default function RecentOrdersTable({
 
                     {/* Shoe Product */}
                     <td className="py-4 px-5">
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">👟</span>
-                        <div>
-                          <div className="font-medium text-slate-800 line-clamp-1">
+                      <div className="flex items-center gap-2.5">
+                        <ShoeImage
+                          src={firstItem.image}
+                          alt={firstItem.shoeName}
+                          size="sm"
+                          brand={firstItem.brand}
+                          className="w-10 h-10 rounded-lg shrink-0"
+                        />
+                        <div className="min-w-0">
+                          <div className="font-semibold text-slate-800 line-clamp-1">
                             {firstItem.shoeName}
                           </div>
                           <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="inline-block px-1.5 py-0.2 bg-slate-100 text-slate-600 font-semibold rounded text-[11px]">
+                            <span className="inline-block px-1.5 py-0.2 bg-slate-100 text-slate-700 font-mono tabular-nums font-bold rounded text-[11px]">
                               Size {firstItem.size}
                             </span>
                             {extraItemsCount > 0 && (
@@ -224,7 +231,7 @@ export default function RecentOrdersTable({
 
                     {/* Amount & Payment Method */}
                     <td className="py-4 px-5">
-                      <div className="font-bold text-slate-900">
+                      <div className="font-mono tabular-nums font-bold text-slate-900">
                         {formatRupiah(order.totalAmount)}
                       </div>
                       <div className="text-[11px] text-slate-500 font-medium mt-0.5">

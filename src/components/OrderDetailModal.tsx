@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Order, PaymentStatus } from '@/types';
+import ShoeImage from '@/components/ShoeImage';
 import {
   X,
   Printer,
@@ -144,9 +145,13 @@ export default function OrderDetailModal({
               {order.items.map((item, idx) => (
                 <div key={idx} className="p-3.5 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-xl shrink-0">
-                      {item.image}
-                    </div>
+                    <ShoeImage
+                      src={item.image}
+                      alt={item.shoeName}
+                      size="md"
+                      brand={item.brand}
+                      className="w-12 h-12 rounded-xl"
+                    />
                     <div>
                       <p className="font-semibold text-slate-900 text-sm">{item.shoeName}</p>
                       <div className="flex items-center gap-2 text-xs text-slate-500 mt-0.5">

@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { ShoeProduct, ShoeCategory } from '@/types';
+import ShoeImage from '@/components/ShoeImage';
 import {
   Search,
   Filter,
@@ -309,9 +310,13 @@ export default function InventoryTable({
                       {/* Product details */}
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200/80 flex items-center justify-center text-xl shrink-0 group-hover:scale-105 transition-transform">
-                            {item.image || '👟'}
-                          </div>
+                          <ShoeImage
+                            src={item.image}
+                            alt={item.name}
+                            size="md"
+                            brand={item.brand}
+                            className="rounded-xl w-12 h-12"
+                          />
                           <div className="min-w-0 max-w-xs">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <span className="font-bold text-slate-900 truncate">
@@ -319,9 +324,9 @@ export default function InventoryTable({
                               </span>
                             </div>
                             <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-0.5">
-                              <span className="font-semibold text-indigo-600">{item.brand}</span>
+                              <span className="font-bold text-indigo-600 uppercase text-[10px] tracking-wide">{item.brand}</span>
                               <span>•</span>
-                              <span className="font-mono text-slate-400">{item.sku}</span>
+                              <span className="font-mono tabular-nums text-slate-400">{item.sku}</span>
                               <span>•</span>
                               <span className="text-slate-400">{item.color}</span>
                             </div>
@@ -331,7 +336,7 @@ export default function InventoryTable({
 
                       {/* Category */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
                           {item.category}
                         </span>
                       </td>
@@ -339,10 +344,10 @@ export default function InventoryTable({
                       {/* Price & Margin */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         <div>
-                          <p className="font-bold text-slate-900">{formatRupiah(item.price)}</p>
+                          <p className="font-mono tabular-nums font-bold text-slate-900">{formatRupiah(item.price)}</p>
                           <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mt-0.5">
-                            <span className="text-slate-400">Modal: {formatRupiah(item.costPrice)}</span>
-                            <span className="text-emerald-700 font-semibold bg-emerald-50 px-1 rounded text-[10px]">
+                            <span className="text-slate-400 font-mono tabular-nums">Modal: {formatRupiah(item.costPrice)}</span>
+                            <span className="text-emerald-700 font-mono tabular-nums font-semibold bg-emerald-50 px-1 rounded text-[10px]">
                               +{profitMargin}%
                             </span>
                           </div>
