@@ -46,3 +46,21 @@ export interface LowStockShoe {
   category: 'Sneakers' | 'Formal' | 'Running' | 'Casual';
   price: number;
 }
+
+export type ShoeCategory = 'Sneakers' | 'Running' | 'Casual' | 'Basketball' | 'Formal';
+
+export interface ShoeProduct {
+  id: string;
+  name: string;
+  brand: string;
+  sku: string;
+  category: ShoeCategory;
+  price: number; // Harga jual
+  costPrice: number; // Harga modal
+  color: string;
+  sizes: Record<number, number>; // Size EUR -> stok, misal { 38: 4, 39: 5, ... }
+  totalStock: number;
+  threshold: number;
+  image?: string;
+  createdAt: string;
+}

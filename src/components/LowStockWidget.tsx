@@ -9,11 +9,14 @@ interface LowStockWidgetProps {
   onRestockItem?: (id: string) => void;
 }
 
-export default function LowStockWidget({ lowStockItems }: LowStockWidgetProps) {
+export default function LowStockWidget({ lowStockItems, onRestockItem }: LowStockWidgetProps) {
   const [restockedIds, setRestockedIds] = useState<Record<string, boolean>>({});
 
   const handleRestock = (id: string) => {
     setRestockedIds((prev) => ({ ...prev, [id]: true }));
+    if (onRestockItem) {
+      onRestockItem(id);
+    }
     setTimeout(() => {
       setRestockedIds((prev) => ({ ...prev, [id]: false }));
     }, 2000);

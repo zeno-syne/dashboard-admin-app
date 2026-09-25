@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
 import StatCards from '@/components/StatCards';
@@ -9,25 +9,34 @@ import LowStockWidget from '@/components/LowStockWidget';
 import PopularSizesWidget from '@/components/PopularSizesWidget';
 import OrderDetailModal from '@/components/OrderDetailModal';
 import AddProductModal from '@/components/AddProductModal';
-import { mockStats, mockOrders, mockLowStock } from '@/data/mockData';
-import { Order, PaymentStatus } from '@/types';
+import EditStockModal from '@/components/EditStockModal';
+import InventoryTable from '@/components/InventoryTable';
+import { mockStats, mockOrders, mockProducts } from '@/data/mockData';
+import { Order, PaymentStatus, ShoeProduct, LowStockShoe } from '@/types';
 import {
   Boxes,
   Users as UsersIcon,
   Settings as SettingsIcon,
   CheckCircle2,
-  Sparkles,
   DownloadCloud,
-  Store,
 } from 'lucide-react';
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<string>('ringkasan');
   const [isOpenMobile, setIsOpenMobile] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  
+  // Dynamic State for Orders and Inventory
   const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const [products, setProducts] = useState<ShoeProduct[]>(mockProducts);
+  
+  // Modals state
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [selectedProductForStock, setSelectedProductForStock] = useState<ShoeProduct | null>(null);
+  const [isEditStockOpen, setIsEditStockOpen] = useState<boolean>(false);
+  
+  // Toast notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -37,6 +46,31 @@ export default function DashboardPage() {
     }, 3500);
   };
 
+  // Derive low stock list dynamically from actual products state
+  const dynamicLowStock: LowStockShoe[] = useMemo(() => {
+    const list: LowStockShoe[] = [];
+    products.forEach((p) => {
+      Object.entries(p.sizes).forEach(([szStr, qty]) => {
+        const sz = parseInt(szStr, 10);
+        if (qty <= p.threshold) {
+          list.push({
+            id: `${p.id}-${sz}`,
+            name: p.name,
+            brand: p.brand,
+            sku: `${p.sku}-${sz}`,
+            size: sz,
+            stockLeft: qty,
+            threshold: p.threshold,
+            category: p.category as any,
+            price: p.price,
+          });
+        }
+      });
+    });
+    return list.sort((a, b) => a.stockLeft - b.stockLeft).slice(0, 6);
+  }, [products]);
+
+  // Order status update
   const handleUpdateOrderStatus = (orderId: string, newStatus: PaymentStatus) => {
     setOrders((prev) =>
       prev.map((o) => (o.id === orderId ? { ...o, paymentStatus: newStatus } : o))
@@ -47,8 +81,57 @@ export default function DashboardPage() {
     showToast(`Status pesanan ${orderId} berhasil diubah menjadi "${newStatus}"`);
   };
 
-  const handleAddProductSuccess = (name: string) => {
-    showToast(`Produk "${name}" berhasil ditambahkan ke katalog inventaris!`);
+  // Product Add handler
+  const handleAddProduct = (newProduct: ShoeProduct) => {
+    setProducts((prev) => [newProduct, ...prev]);
+    showToast(`Model "${newProduct.name}" berhasil ditambahkan ke inventaris!`);
+  };
+
+  // Product Delete handler
+  const handleDeleteProduct = (productId: string) => {
+    setProducts((prev) => prev.filter((p) => p.id !== productId));
+    showToast('Produk sepatu berhasil dihapus dari inventaris');
+  };
+
+  // Open Edit Stock Modal
+  const handleOpenEditStock = (product: ShoeProduct) => {
+    setSelectedProductForStock(product);
+    setIsEditStockOpen(true);
+  };
+
+  // Save updated stock per size
+  const handleSaveStock = (productId: string, newSizes: Record<number, number>) => {
+    setProducts((prev) =>
+      prev.map((p) => {
+        if (p.id === productId) {
+          const totalStock = Object.values(newSizes).reduce((acc, curr) => acc + (curr || 0), 0);
+          return { ...p, sizes: newSizes, totalStock };
+        }
+        return p;
+      })
+    );
+    showToast('Stok sepatu berhasil diperbarui');
+  };
+
+  // Quick restock from LowStockWidget (+5 pairs)
+  const handleQuickRestock = (compositeId: string) => {
+    // ID formatted as `PRD-001-42`
+    const parts = compositeId.split('-');
+    const size = parseInt(parts[parts.length - 1], 10);
+    const prodId = parts.slice(0, -1).join('-');
+
+    setProducts((prev) =>
+      prev.map((p) => {
+        if (p.id === prodId) {
+          const current = p.sizes[size] || 0;
+          const updatedSizes = { ...p.sizes, [size]: current + 5 };
+          const updatedTotal = Object.values(updatedSizes).reduce((acc, curr) => acc + (curr || 0), 0);
+          return { ...p, sizes: updatedSizes, totalStock: updatedTotal };
+        }
+        return p;
+      })
+    );
+    showToast(`Restock +5 pasang berhasil untuk ukuran ${size}`);
   };
 
   return (
@@ -123,7 +206,10 @@ export default function DashboardPage() {
               {/* Side-by-side widgets: Low Stock Alert & Popular Sizes */}
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <div className="lg:col-span-7">
-                  <LowStockWidget lowStockItems={mockLowStock} />
+                  <LowStockWidget
+                    lowStockItems={dynamicLowStock}
+                    onRestockItem={handleQuickRestock}
+                  />
                 </div>
                 <div className="lg:col-span-5">
                   <PopularSizesWidget />
@@ -161,26 +247,23 @@ export default function DashboardPage() {
 
           {activeTab === 'inventaris' && (
             <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-                <div>
-                  <h2 className="text-lg font-bold text-slate-900">Inventaris & Stok Sepatu</h2>
-                  <p className="text-xs text-slate-500">
-                    Pantau stok berdasarkan ukuran (EUR), merk sepatu, dan SKU gudang.
-                  </p>
-                </div>
-                <button
-                  onClick={() => setIsAddModalOpen(true)}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-semibold shadow-sm shadow-indigo-200"
-                >
-                  + Tambah Varian Baru
-                </button>
-              </div>
+              {/* Full Interactive Inventory Table */}
+              <InventoryTable
+                products={products}
+                onOpenAddModal={() => setIsAddModalOpen(true)}
+                onSelectProductForEditStock={handleOpenEditStock}
+                onDeleteProduct={handleDeleteProduct}
+              />
 
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <div className="lg:col-span-8">
-                  <LowStockWidget lowStockItems={mockLowStock} />
+              {/* Secondary widgets row for inventory context */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-2">
+                <div className="lg:col-span-7">
+                  <LowStockWidget
+                    lowStockItems={dynamicLowStock}
+                    onRestockItem={handleQuickRestock}
+                  />
                 </div>
-                <div className="lg:col-span-4">
+                <div className="lg:col-span-5">
                   <PopularSizesWidget />
                 </div>
               </div>
@@ -287,7 +370,18 @@ export default function DashboardPage() {
       <AddProductModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        onSuccess={handleAddProductSuccess}
+        onAddProduct={handleAddProduct}
+      />
+
+      {/* Edit Stock Modal */}
+      <EditStockModal
+        product={selectedProductForStock}
+        isOpen={isEditStockOpen}
+        onClose={() => {
+          setIsEditStockOpen(false);
+          setSelectedProductForStock(null);
+        }}
+        onSaveStock={handleSaveStock}
       />
     </div>
   );
