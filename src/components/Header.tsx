@@ -21,6 +21,7 @@ interface HeaderProps {
   isOffline?: boolean;
   onToggleOffline?: () => void;
   pendingOfflineCount?: number;
+  onOpenCommandPalette?: () => void;
 }
 
 export default function Header({
@@ -31,6 +32,7 @@ export default function Header({
   isOffline = false,
   onToggleOffline,
   pendingOfflineCount = 0,
+  onOpenCommandPalette,
 }: HeaderProps) {
   const [showNotifications, setShowNotifications] = useState(false);
 
@@ -73,16 +75,20 @@ export default function Header({
           <Menu className="w-5 h-5" />
         </button>
 
-        <div className="relative w-full">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+        <div
+          onClick={onOpenCommandPalette}
+          className="relative w-full cursor-pointer group"
+        >
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 group-hover:text-indigo-600 transition-colors" />
           <input
             type="text"
+            readOnly={!!onOpenCommandPalette}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search sneakers, SKU, colorway, or order ID..."
-            className="w-full pl-10 pr-12 py-2 text-xs sm:text-sm bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200/90 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-slate-800 placeholder-slate-400"
+            placeholder="Search sneakers, SKU, colorway, or press ⌘K..."
+            className="w-full pl-10 pr-12 py-2 text-xs sm:text-sm bg-slate-50 hover:bg-slate-100/80 focus:bg-white border border-slate-200/90 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-slate-800 placeholder-slate-400 cursor-pointer"
           />
-          <kbd className="hidden sm:inline-flex items-center gap-0.5 absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-white border border-slate-200 rounded shadow-2xs pointer-events-none">
+          <kbd className="hidden sm:inline-flex items-center gap-0.5 absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-white border border-slate-200 rounded shadow-2xs group-hover:border-indigo-300 group-hover:text-indigo-600 transition-colors">
             ⌘K
           </kbd>
         </div>

@@ -19,6 +19,7 @@ import SettingsModule from '@/components/SettingsModule';
 import FinancialAnalyticsModule from '@/components/FinancialAnalyticsModule';
 import PwaOfflineManager from '@/components/PwaOfflineManager';
 import SalesRevenueTrendChart from '@/components/SalesRevenueTrendChart';
+import CommandPaletteModal from '@/components/CommandPaletteModal';
 import { mockStats, mockOrders, mockProducts, mockCustomers, defaultStoreSettings } from '@/data/mockData';
 import { Order, PaymentStatus, ShoeProduct, LowStockShoe, PosTransaction, Customer, StoreSettings } from '@/types';
 import {
@@ -55,6 +56,19 @@ export default function DashboardPage() {
   // POS Receipt modal state
   const [lastTransaction, setLastTransaction] = useState<PosTransaction | null>(null);
   const [isReceiptOpen, setIsReceiptOpen] = useState<boolean>(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState<boolean>(false);
+
+  // Global ⌘K Shortcut Listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Toast notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -480,6 +494,7 @@ export default function DashboardPage() {
             isOffline={isSimulatedOffline}
             onToggleOffline={() => setIsSimulatedOffline(!isSimulatedOffline)}
             pendingOfflineCount={offlineQueue.length}
+            onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
           />
 
         {/* Dashboard Main Container */}
@@ -677,6 +692,24 @@ export default function DashboardPage() {
         product={selectedProductForLabel}
         isOpen={!!selectedProductForLabel}
         onClose={() => setSelectedProductForLabel(null)}
+      />
+
+      {/* Global Command Palette ⌘K Modal */}
+      <CommandPaletteModal
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        products={products}
+        orders={orders}
+        customers={customers}
+        onNavigateTab={(tab) => {
+          setActiveTab(tab);
+          setIsCommandPaletteOpen(false);
+        }}
+        onOpenAddModal={() => {
+          setIsAddModalOpen(true);
+          setIsCommandPaletteOpen(false);
+        }}
+        onExportCsv={handleExportCsv}
       />
     </div>
   );
