@@ -25,6 +25,7 @@ interface InventoryTableProps {
   onOpenAddModal: () => void;
   onSelectProductForEditStock: (product: ShoeProduct) => void;
   onDeleteProduct: (productId: string) => void;
+  onPrintLabel?: (product: ShoeProduct) => void;
 }
 
 const ALL_SIZES = [38, 39, 40, 41, 42, 43, 44];
@@ -34,6 +35,7 @@ export default function InventoryTable({
   onOpenAddModal,
   onSelectProductForEditStock,
   onDeleteProduct,
+  onPrintLabel,
 }: InventoryTableProps) {
   const [search, setSearch] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('Semua');
@@ -409,6 +411,15 @@ export default function InventoryTable({
                       {/* Actions */}
                       <td className="py-3.5 px-4 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1.5">
+                          {onPrintLabel && (
+                            <button
+                              onClick={() => onPrintLabel(item)}
+                              title="Cetak Stiker Label Dus Sepatu"
+                              className="p-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors"
+                            >
+                              <Tag className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                           <button
                             onClick={() => onSelectProductForEditStock(item)}
                             title="Sesuaikan Stok Sepatu"

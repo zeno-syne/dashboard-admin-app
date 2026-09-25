@@ -10,6 +10,7 @@ import PopularSizesWidget from '@/components/PopularSizesWidget';
 import OrderDetailModal from '@/components/OrderDetailModal';
 import AddProductModal from '@/components/AddProductModal';
 import EditStockModal from '@/components/EditStockModal';
+import ShoeBoxLabelModal from '@/components/ShoeBoxLabelModal';
 import InventoryTable from '@/components/InventoryTable';
 import PosModule from '@/components/PosModule';
 import ReceiptModal from '@/components/ReceiptModal';
@@ -45,6 +46,7 @@ export default function DashboardPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
   const [selectedProductForStock, setSelectedProductForStock] = useState<ShoeProduct | null>(null);
   const [isEditStockOpen, setIsEditStockOpen] = useState<boolean>(false);
+  const [selectedProductForLabel, setSelectedProductForLabel] = useState<ShoeProduct | null>(null);
   
   // POS Receipt modal state
   const [lastTransaction, setLastTransaction] = useState<PosTransaction | null>(null);
@@ -520,6 +522,7 @@ export default function DashboardPage() {
                 onOpenAddModal={() => setIsAddModalOpen(true)}
                 onSelectProductForEditStock={handleOpenEditStock}
                 onDeleteProduct={handleDeleteProduct}
+                onPrintLabel={(product) => setSelectedProductForLabel(product)}
               />
 
               {/* Secondary widgets row for inventory context */}
@@ -595,6 +598,13 @@ export default function DashboardPage() {
         onClose={() => setIsReceiptOpen(false)}
         onNewTransaction={() => setIsReceiptOpen(false)}
         settings={settings}
+      />
+
+      {/* Shoe Box Label Modal */}
+      <ShoeBoxLabelModal
+        product={selectedProductForLabel}
+        isOpen={!!selectedProductForLabel}
+        onClose={() => setSelectedProductForLabel(null)}
       />
     </div>
   );

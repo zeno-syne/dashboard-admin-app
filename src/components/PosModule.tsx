@@ -46,12 +46,37 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
   const [discountPercent, setDiscountPercent] = useState<number>(0);
   const [cashAmountInput, setCashAmountInput] = useState<string>('');
 
+  // Barcode Scanning states
+  const [barcodeInput, setBarcodeInput] = useState<string>('');
+  const [barcodeFeedback, setBarcodeFeedback] = useState<{ message: string; isError?: boolean } | null>(null);
+  const [isBarcodeSimulatorOpen, setIsBarcodeSimulatorOpen] = useState<boolean>(false);
+  const barcodeInputRef = useRef<HTMLInputElement>(null);
+
   // Tactile animation states
   const [animatingKey, setAnimatingKey] = useState<string | null>(null);
   const [cartBounced, setCartBounced] = useState<boolean>(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const formatRupiah = (val: number) => 'Rp ' + val.toLocaleString('id-ID');
+
+  // Crisp high-pitch beep for barcode scan success (laser scanner sound)
+  const playBarcodeScanSuccess = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(1760, ctx.currentTime);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.09);
+    } catch {}
+  };
 
   // Subtle synthesized audio feedback (Cash register tactile tick)
   const playTactileBeep = () => {
@@ -162,6 +187,73 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
         return [...prev, newItem];
       }
     });
+  };
+
+  // Process Barcode scan (e.g. NKE-AJ1-01-42 or PRD-001-42 or raw SKU)
+  const handleProcessBarcode = (scannedCode: string) => {
+    const raw = scannedCode.trim();
+    if (!raw) return;
+
+    // Check if format has -<size> at the end
+    const lastDashIdx = raw.lastIndexOf('-');
+    let candidateSku = raw;
+    let targetSize: number | null = null;
+
+    if (lastDashIdx > -1) {
+      const possibleSizeStr = raw.substring(lastDashIdx + 1);
+      const possibleSize = parseInt(possibleSizeStr, 10);
+      if (!isNaN(possibleSize) && possibleSize >= 35 && possibleSize <= 48) {
+        targetSize = possibleSize;
+        candidateSku = raw.substring(0, lastDashIdx);
+      }
+    }
+
+    // Find product matching candidateSku or raw
+    const matchedProduct = products.find(
+      (p) =>
+        p.sku.toLowerCase() === candidateSku.toLowerCase() ||
+        p.id.toLowerCase() === candidateSku.toLowerCase() ||
+        p.sku.toLowerCase() === raw.toLowerCase() ||
+        p.id.toLowerCase() === raw.toLowerCase()
+    );
+
+    if (!matchedProduct) {
+      setBarcodeFeedback({
+        message: `Barcode "${raw}" tidak terdaftar dalam inventaris sepatu.`,
+        isError: true,
+      });
+      setTimeout(() => setBarcodeFeedback(null), 4000);
+      setBarcodeInput('');
+      return;
+    }
+
+    // Determine size to add
+    const finalSize =
+      targetSize ||
+      Object.keys(matchedProduct.sizes)
+        .map(Number)
+        .find((sz) => (matchedProduct.sizes[sz] || 0) > 0) ||
+      42;
+
+    const availableStock = matchedProduct.sizes[finalSize] || 0;
+    if (availableStock <= 0) {
+      setBarcodeFeedback({
+        message: `Stok ${matchedProduct.name} ukuran EUR ${finalSize} saat ini HABIS.`,
+        isError: true,
+      });
+      setTimeout(() => setBarcodeFeedback(null), 4000);
+      setBarcodeInput('');
+      return;
+    }
+
+    handleAddToCart(matchedProduct, finalSize);
+    playBarcodeScanSuccess();
+    setBarcodeFeedback({
+      message: `Berhasil Scan: ${matchedProduct.name} (EUR ${finalSize}) masuk kasir!`,
+      isError: false,
+    });
+    setTimeout(() => setBarcodeFeedback(null), 3500);
+    setBarcodeInput('');
   };
 
   // Stepper quantity update
@@ -287,6 +379,101 @@ export default function PosModule({ products, onCompleteTransaction }: PosModule
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Side: Product Catalogue & Quick Size Picker (7 cols on lg) */}
         <div className="lg:col-span-7 space-y-4">
+          {/* Barcode Scanner Bar */}
+          <div className="bg-gradient-to-r from-slate-900 to-indigo-950 p-3.5 rounded-2xl text-white shadow-xs space-y-2 border border-slate-800">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <QrCode className="w-4 h-4 text-indigo-400" />
+                <span className="text-xs font-bold tracking-tight">Barcode Scanner POS</span>
+                <span className="px-1.5 py-0.5 rounded bg-indigo-500/30 text-indigo-200 text-[10px] font-mono">
+                  USB / Laser Ready
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsBarcodeSimulatorOpen(!isBarcodeSimulatorOpen)}
+                className="text-[11px] font-semibold text-indigo-300 hover:text-white transition-colors cursor-pointer flex items-center gap-1"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{isBarcodeSimulatorOpen ? 'Tutup Simulator' : '⚡ Simulator Barcode'}</span>
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleProcessBarcode(barcodeInput);
+              }}
+              className="flex items-center gap-2"
+            >
+              <div className="relative flex-1">
+                <input
+                  ref={barcodeInputRef}
+                  type="text"
+                  value={barcodeInput}
+                  onChange={(e) => setBarcodeInput(e.target.value)}
+                  placeholder="Scan barcode dus sepatu (cth: NKE-AJ1-01-42 lalu tekan Enter)..."
+                  className="w-full bg-slate-800/90 border border-slate-700 focus:border-indigo-400 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none font-mono"
+                />
+              </div>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs transition-all shadow-xs cursor-pointer shrink-0"
+              >
+                Scan Enter
+              </button>
+            </form>
+
+            {/* Barcode Scanner Feedback Alert */}
+            {barcodeFeedback && (
+              <div
+                className={`p-2 rounded-xl text-xs flex items-center gap-2 animate-in fade-in-50 duration-150 ${
+                  barcodeFeedback.isError
+                    ? 'bg-rose-500/20 border border-rose-500/40 text-rose-200'
+                    : 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-200 font-semibold'
+                }`}
+              >
+                <CheckCircle2 className="w-4 h-4 shrink-0" />
+                <span>{barcodeFeedback.message}</span>
+              </div>
+            )}
+
+            {/* Barcode Simulator Drawer */}
+            {isBarcodeSimulatorOpen && (
+              <div className="p-3 bg-slate-800/90 border border-slate-700/80 rounded-xl space-y-2 mt-2">
+                <p className="text-[11px] text-slate-300">
+                  Klik tombol <strong>Scan</strong> pada salah satu barcode dus sepatu di bawah untuk mensimulasikan scanner laser:
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-1">
+                  {products.slice(0, 6).map((p) => {
+                    const sampleSize = Object.keys(p.sizes).find((s) => (p.sizes[Number(s)] || 0) > 0) || 42;
+                    const sampleCode = `${p.sku}-${sampleSize}`;
+                    return (
+                      <div
+                        key={p.id}
+                        className="bg-slate-900/90 p-2 rounded-lg border border-slate-700 flex items-center justify-between gap-2 text-[11px]"
+                      >
+                        <div className="truncate">
+                          <p className="font-bold text-white truncate">{p.name}</p>
+                          <p className="text-[10px] text-indigo-300 font-mono">
+                            {sampleCode} (EUR {sampleSize})
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleProcessBarcode(sampleCode)}
+                          className="px-2.5 py-1 rounded bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[10px] shrink-0 transition-colors cursor-pointer"
+                        >
+                          ⚡ Scan
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Search & Filter Toolbar */}
           <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
             <div className="relative">
