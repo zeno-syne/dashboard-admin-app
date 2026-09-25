@@ -93,3 +93,23 @@ export interface PosTransaction {
   cashAmountPaid?: number;
   changeDue?: number;
 }
+
+export type CustomerTier = 'Sneakerhead VIP' | 'Gold Vault' | 'Silver Collector' | 'Bronze Member';
+
+export interface Customer {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  city: string;
+  tier: CustomerTier;
+  points: number;
+  totalSpent: number; // LTV (Lifetime Value)
+  totalOrders: number;
+  preferredSize: number; // EUR
+  favoriteBrand: string;
+  joinedDate: string;
+  lastPurchaseDate: string;
+  notes?: string;
+}
+

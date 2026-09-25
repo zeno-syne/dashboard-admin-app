@@ -13,8 +13,9 @@ import EditStockModal from '@/components/EditStockModal';
 import InventoryTable from '@/components/InventoryTable';
 import PosModule from '@/components/PosModule';
 import ReceiptModal from '@/components/ReceiptModal';
-import { mockStats, mockOrders, mockProducts } from '@/data/mockData';
-import { Order, PaymentStatus, ShoeProduct, LowStockShoe, PosTransaction } from '@/types';
+import CustomersModule from '@/components/CustomersModule';
+import { mockStats, mockOrders, mockProducts, mockCustomers } from '@/data/mockData';
+import { Order, PaymentStatus, ShoeProduct, LowStockShoe, PosTransaction, Customer } from '@/types';
 import {
   Boxes,
   Users as UsersIcon,
@@ -30,9 +31,10 @@ export default function DashboardPage() {
   const [isOpenMobile, setIsOpenMobile] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   
-  // Dynamic State for Orders and Inventory
+  // Dynamic State for Orders, Inventory, and Customers
   const [orders, setOrders] = useState<Order[]>(mockOrders);
   const [products, setProducts] = useState<ShoeProduct[]>(mockProducts);
+  const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
   const [isHydrated, setIsHydrated] = useState(false);
   
   // Modals state
@@ -66,6 +68,10 @@ export default function DashboardPage() {
       if (savedOrders) {
         setOrders(JSON.parse(savedOrders));
       }
+      const savedCustomers = localStorage.getItem('kicksmate_customers');
+      if (savedCustomers) {
+        setCustomers(JSON.parse(savedCustomers));
+      }
     } catch (e) {
       console.error('Failed to load from storage', e);
     }
@@ -92,6 +98,16 @@ export default function DashboardPage() {
       }
     }
   }, [orders, isHydrated]);
+
+  useEffect(() => {
+    if (isHydrated) {
+      try {
+        localStorage.setItem('kicksmate_customers', JSON.stringify(customers));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, [customers, isHydrated]);
 
   // Derive low stock list dynamically from actual products state
   const dynamicLowStock: LowStockShoe[] = useMemo(() => {
@@ -228,10 +244,25 @@ export default function DashboardPage() {
     if (confirm('Reset semua data kembali ke default (menghapus data lokal)?')) {
       localStorage.removeItem('kicksmate_products');
       localStorage.removeItem('kicksmate_orders');
+      localStorage.removeItem('kicksmate_customers');
       setProducts(mockProducts);
       setOrders(mockOrders);
+      setCustomers(mockCustomers);
       showToast('Data berhasil di-reset ke nilai awal bawaan!');
     }
+  };
+
+  // Customer Management Handlers
+  const handleAddCustomer = (newCustomer: Customer) => {
+    setCustomers((prev) => [newCustomer, ...prev]);
+    showToast(`Pelanggan "${newCustomer.name}" berhasil didaftarkan sebagai member!`);
+  };
+
+  const handleUpdateCustomerNotes = (customerId: string, notes: string) => {
+    setCustomers((prev) =>
+      prev.map((c) => (c.id === customerId ? { ...c, notes } : c))
+    );
+    showToast('Catatan pelanggan berhasil diperbarui!');
   };
 
   // Handle POS Checkout Completion
@@ -294,7 +325,37 @@ export default function DashboardPage() {
 
     setOrders((prev) => [newOrder, ...prev]);
 
-    // 3. Trigger receipt modal and toast
+    // 3. Sync customer points & LTV if member exists
+    if (transaction.customerName && transaction.customerName !== 'Pelanggan Walk-In') {
+      setCustomers((prev) =>
+        prev.map((c) => {
+          if (
+            c.name.toLowerCase() === transaction.customerName.toLowerCase() ||
+            (transaction.customerPhone && c.phone === transaction.customerPhone)
+          ) {
+            const newTotalSpent = c.totalSpent + transaction.total;
+            const newOrders = c.totalOrders + 1;
+            const pointsEarned = Math.round(transaction.total / 10000);
+            let newTier = c.tier;
+            if (newTotalSpent >= 10000000) newTier = 'Sneakerhead VIP';
+            else if (newTotalSpent >= 4000000) newTier = 'Gold Vault';
+            else if (newTotalSpent >= 1500000) newTier = 'Silver Collector';
+
+            return {
+              ...c,
+              totalSpent: newTotalSpent,
+              totalOrders: newOrders,
+              points: c.points + pointsEarned,
+              tier: newTier,
+              lastPurchaseDate: 'Hari Ini',
+            };
+          }
+          return c;
+        })
+      );
+    }
+
+    // 4. Trigger receipt modal and toast
     setLastTransaction(transaction);
     setIsReceiptOpen(true);
     showToast(`Transaksi kasir ${transaction.id} berhasil dicatat & stok terpotong!`);
@@ -452,39 +513,12 @@ export default function DashboardPage() {
           )}
 
           {activeTab === 'pelanggan' && (
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs">
-              <div className="flex items-center gap-2 mb-4">
-                <UsersIcon className="w-5 h-5 text-indigo-600" />
-                <h2 className="text-base font-bold text-slate-900">Direktori Pelanggan Toko</h2>
-              </div>
-              <p className="text-xs text-slate-500 mb-6">
-                Total 1.420 pelanggan terdaftar dengan program loyalitas poin sepatu.
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {orders.slice(0, 6).map((ord) => (
-                  <div
-                    key={ord.id}
-                    className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-100/60 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs">
-                        {ord.customerName.slice(0, 2).toUpperCase()}
-                      </div>
-                      <div className="overflow-hidden">
-                        <p className="font-semibold text-slate-900 text-sm truncate">
-                          {ord.customerName}
-                        </p>
-                        <p className="text-xs text-slate-500 truncate">{ord.customerEmail}</p>
-                      </div>
-                    </div>
-                    <div className="mt-3 pt-3 border-t border-slate-200/60 flex items-center justify-between text-xs text-slate-500">
-                      <span>{ord.customerCity}</span>
-                      <span className="font-semibold text-indigo-600">VIP Member</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <CustomersModule
+              customers={customers}
+              orders={orders}
+              onAddCustomer={handleAddCustomer}
+              onUpdateCustomerNotes={handleUpdateCustomerNotes}
+            />
           )}
 
           {activeTab === 'pengaturan' && (
