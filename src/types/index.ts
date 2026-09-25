@@ -64,3 +64,32 @@ export interface ShoeProduct {
   image?: string;
   createdAt: string;
 }
+
+export interface PosCartItem {
+  productId: string;
+  name: string;
+  brand: string;
+  sku: string;
+  size: number;
+  color: string;
+  price: number;
+  quantity: number;
+  availableStock: number;
+  image?: string;
+}
+
+export interface PosTransaction {
+  id: string;
+  customerName: string;
+  customerPhone?: string;
+  cashierName: string;
+  branchName: string;
+  date: string;
+  items: PosCartItem[];
+  subtotal: number;
+  discount: number;
+  total: number;
+  paymentMethod: 'Tunai' | 'QRIS' | 'Debit BCA' | 'Kartu Kredit';
+  cashAmountPaid?: number;
+  changeDue?: number;
+}

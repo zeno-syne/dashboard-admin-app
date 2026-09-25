@@ -11,7 +11,8 @@ import {
   Store,
   ChevronRight,
   LogOut,
-  X
+  X,
+  Receipt,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -23,8 +24,9 @@ interface SidebarProps {
 
 export const menuItems = [
   { id: 'ringkasan', label: 'Ringkasan', icon: LayoutDashboard, badge: null },
+  { id: 'pos', label: 'Kasir POS', icon: Receipt, badge: 'Kasir' },
   { id: 'pesanan', label: 'Pesanan', icon: ShoppingBag, badge: '3 Baru' },
-  { id: 'inventaris', label: 'Inventaris', icon: Boxes, badge: '8 Alert' },
+  { id: 'inventaris', label: 'Inventaris', icon: Boxes, badge: 'Stok' },
   { id: 'pelanggan', label: 'Pelanggan', icon: Users, badge: null },
   { id: 'pengaturan', label: 'Pengaturan', icon: Settings, badge: null },
 ];

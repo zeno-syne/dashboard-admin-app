@@ -11,14 +11,17 @@ import OrderDetailModal from '@/components/OrderDetailModal';
 import AddProductModal from '@/components/AddProductModal';
 import EditStockModal from '@/components/EditStockModal';
 import InventoryTable from '@/components/InventoryTable';
+import PosModule from '@/components/PosModule';
+import ReceiptModal from '@/components/ReceiptModal';
 import { mockStats, mockOrders, mockProducts } from '@/data/mockData';
-import { Order, PaymentStatus, ShoeProduct, LowStockShoe } from '@/types';
+import { Order, PaymentStatus, ShoeProduct, LowStockShoe, PosTransaction } from '@/types';
 import {
   Boxes,
   Users as UsersIcon,
   Settings as SettingsIcon,
   CheckCircle2,
   DownloadCloud,
+  Receipt,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -36,6 +39,10 @@ export default function DashboardPage() {
   const [selectedProductForStock, setSelectedProductForStock] = useState<ShoeProduct | null>(null);
   const [isEditStockOpen, setIsEditStockOpen] = useState<boolean>(false);
   
+  // POS Receipt modal state
+  const [lastTransaction, setLastTransaction] = useState<PosTransaction | null>(null);
+  const [isReceiptOpen, setIsReceiptOpen] = useState<boolean>(false);
+
   // Toast notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -115,7 +122,6 @@ export default function DashboardPage() {
 
   // Quick restock from LowStockWidget (+5 pairs)
   const handleQuickRestock = (compositeId: string) => {
-    // ID formatted as `PRD-001-42`
     const parts = compositeId.split('-');
     const size = parseInt(parts[parts.length - 1], 10);
     const prodId = parts.slice(0, -1).join('-');
@@ -132,6 +138,72 @@ export default function DashboardPage() {
       })
     );
     showToast(`Restock +5 pasang berhasil untuk ukuran ${size}`);
+  };
+
+  // Handle POS Checkout Completion
+  const handleCompletePosTransaction = (transaction: PosTransaction) => {
+    // 1. Deduct stock for all purchased shoe sizes
+    setProducts((prev) => {
+      return prev.map((product) => {
+        const itemsForThisProduct = transaction.items.filter(
+          (item) => item.productId === product.id
+        );
+        if (itemsForThisProduct.length === 0) return product;
+
+        const updatedSizes = { ...product.sizes };
+        itemsForThisProduct.forEach((item) => {
+          const currentQty = updatedSizes[item.size] || 0;
+          updatedSizes[item.size] = Math.max(0, currentQty - item.quantity);
+        });
+
+        const newTotal = Object.values(updatedSizes).reduce((a, b) => a + (b || 0), 0);
+        return {
+          ...product,
+          sizes: updatedSizes,
+          totalStock: newTotal,
+        };
+      });
+    });
+
+    // 2. Map transaction to an Order record
+    const paymentMethodMap: Record<string, Order['paymentMethod']> = {
+      'Tunai': 'COD',
+      'QRIS': 'QRIS',
+      'Debit BCA': 'BCA Virtual Account',
+      'Kartu Kredit': 'Kartu Kredit',
+    };
+
+    const newOrder: Order = {
+      id: transaction.id,
+      customerName: transaction.customerName,
+      customerEmail: transaction.customerPhone
+        ? `${transaction.customerPhone}@pos.local`
+        : 'kasir-offline@kicksmate.id',
+      customerPhone: transaction.customerPhone || '0812-POS-OFFLINE',
+      customerCity: 'Bandung (Toko Fisik)',
+      orderDate: transaction.date,
+      totalAmount: transaction.total,
+      paymentMethod: paymentMethodMap[transaction.paymentMethod] || 'QRIS',
+      paymentStatus: 'Lunas',
+      shippingCourier: 'Kasir Toko (Ambil Langsung)',
+      trackingNumber: `STRUK-${transaction.id}`,
+      items: transaction.items.map((i) => ({
+        shoeName: i.name,
+        brand: i.brand,
+        size: i.size,
+        color: i.color,
+        quantity: i.quantity,
+        price: i.price,
+        image: i.image || '👟',
+      })),
+    };
+
+    setOrders((prev) => [newOrder, ...prev]);
+
+    // 3. Trigger receipt modal and toast
+    setLastTransaction(transaction);
+    setIsReceiptOpen(true);
+    showToast(`Transaksi kasir ${transaction.id} berhasil dicatat & stok terpotong!`);
   };
 
   return (
@@ -177,17 +249,25 @@ export default function DashboardPage() {
                 </span>
               </div>
               <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                Kelola penjualan ritel, pantau status pembayaran, dan kontrol stok sepatu toko fisik & online Anda.
+                Kelola penjualan ritel, kasir POS toko fisik, pantau pembayaran, dan kontrol stok sepatu Anda.
               </p>
             </div>
 
             <div className="flex items-center gap-2.5 shrink-0">
               <button
+                onClick={() => setActiveTab('pos')}
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold transition-all shadow-sm shadow-indigo-200"
+              >
+                <Receipt className="w-4 h-4" />
+                <span>Buka Kasir POS</span>
+              </button>
+
+              <button
                 onClick={() => showToast('Laporan penjualan September 2026 berhasil diekspor (PDF/Excel)')}
                 className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition-all shadow-2xs"
               >
                 <DownloadCloud className="w-4 h-4 text-slate-500" />
-                <span>Unduh Laporan</span>
+                <span className="hidden sm:inline">Unduh Laporan</span>
               </button>
             </div>
           </div>
@@ -227,13 +307,20 @@ export default function DashboardPage() {
             </>
           )}
 
+          {activeTab === 'pos' && (
+            <PosModule
+              products={products}
+              onCompleteTransaction={handleCompletePosTransaction}
+            />
+          )}
+
           {activeTab === 'pesanan' && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-bold text-slate-900">Manajemen Semua Pesanan</h2>
                   <p className="text-xs text-slate-500">
-                    Daftar seluruh transaksi yang masuk dari kasir toko, website, dan kurir.
+                    Daftar seluruh transaksi yang masuk dari kasir toko fisik, website, dan kurir.
                   </p>
                 </div>
               </div>
@@ -382,6 +469,14 @@ export default function DashboardPage() {
           setSelectedProductForStock(null);
         }}
         onSaveStock={handleSaveStock}
+      />
+
+      {/* POS Receipt Modal */}
+      <ReceiptModal
+        transaction={lastTransaction}
+        isOpen={isReceiptOpen}
+        onClose={() => setIsReceiptOpen(false)}
+        onNewTransaction={() => setIsReceiptOpen(false)}
       />
     </div>
   );
