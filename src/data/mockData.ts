@@ -1,4 +1,4 @@
-import { Order, StatItem, LowStockShoe, ShoeProduct, Customer } from '@/types';
+import { Order, StatItem, LowStockShoe, ShoeProduct, Customer, StoreSettings } from '@/types';
 
 export const mockStats: StatItem[] = [
   {
@@ -518,5 +518,22 @@ export const mockCustomers: Customer[] = [
     notes: 'Tech runner enthusiast (Gel-Kayano 14, GT-2160).',
   },
 ];
+
+export const defaultStoreSettings: StoreSettings = {
+  storeName: 'KICKSMATE SNEAKERS',
+  tagline: 'Footwear & Sneakers Vault',
+  branchName: 'Cabang Dago - Bandung',
+  address: 'Jl. Ir. H. Juanda No. 102, Dago, Bandung',
+  phone: '0812-2299-8801',
+  instagram: '@kicksmate.id',
+  website: 'www.kicksmate.id',
+  paperSize: '80mm',
+  returnPolicyDays: 3,
+  customFooterText: 'Sepatu dijamin 100% Original BNIB. Tukar size max 3 hari dengan menyertakan struk ini.',
+  currencySymbol: 'Rp',
+  taxPercentage: 0,
+  showLogoOnReceipt: true,
+};
+
 
 

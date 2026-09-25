@@ -113,3 +113,20 @@ export interface Customer {
   notes?: string;
 }
 
+export interface StoreSettings {
+  storeName: string;
+  tagline: string;
+  branchName: string;
+  address: string;
+  phone: string;
+  instagram: string;
+  website: string;
+  paperSize: '58mm' | '80mm';
+  returnPolicyDays: number;
+  customFooterText: string;
+  currencySymbol: string;
+  taxPercentage: number;
+  showLogoOnReceipt: boolean;
+}
+
+

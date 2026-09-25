@@ -14,8 +14,9 @@ import InventoryTable from '@/components/InventoryTable';
 import PosModule from '@/components/PosModule';
 import ReceiptModal from '@/components/ReceiptModal';
 import CustomersModule from '@/components/CustomersModule';
-import { mockStats, mockOrders, mockProducts, mockCustomers } from '@/data/mockData';
-import { Order, PaymentStatus, ShoeProduct, LowStockShoe, PosTransaction, Customer } from '@/types';
+import SettingsModule from '@/components/SettingsModule';
+import { mockStats, mockOrders, mockProducts, mockCustomers, defaultStoreSettings } from '@/data/mockData';
+import { Order, PaymentStatus, ShoeProduct, LowStockShoe, PosTransaction, Customer, StoreSettings } from '@/types';
 import {
   Boxes,
   Users as UsersIcon,
@@ -31,10 +32,11 @@ export default function DashboardPage() {
   const [isOpenMobile, setIsOpenMobile] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   
-  // Dynamic State for Orders, Inventory, and Customers
+  // Dynamic State for Orders, Inventory, Customers, and Settings
   const [orders, setOrders] = useState<Order[]>(mockOrders);
   const [products, setProducts] = useState<ShoeProduct[]>(mockProducts);
   const [customers, setCustomers] = useState<Customer[]>(mockCustomers);
+  const [settings, setSettings] = useState<StoreSettings>(defaultStoreSettings);
   const [isHydrated, setIsHydrated] = useState(false);
   
   // Modals state
@@ -72,6 +74,10 @@ export default function DashboardPage() {
       if (savedCustomers) {
         setCustomers(JSON.parse(savedCustomers));
       }
+      const savedSettings = localStorage.getItem('kicksmate_settings');
+      if (savedSettings) {
+        setSettings(JSON.parse(savedSettings));
+      }
     } catch (e) {
       console.error('Failed to load from storage', e);
     }
@@ -108,6 +114,16 @@ export default function DashboardPage() {
       }
     }
   }, [customers, isHydrated]);
+
+  useEffect(() => {
+    if (isHydrated) {
+      try {
+        localStorage.setItem('kicksmate_settings', JSON.stringify(settings));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, [settings, isHydrated]);
 
   // Derive low stock list dynamically from actual products state
   const dynamicLowStock: LowStockShoe[] = useMemo(() => {
@@ -245,11 +261,19 @@ export default function DashboardPage() {
       localStorage.removeItem('kicksmate_products');
       localStorage.removeItem('kicksmate_orders');
       localStorage.removeItem('kicksmate_customers');
+      localStorage.removeItem('kicksmate_settings');
       setProducts(mockProducts);
       setOrders(mockOrders);
       setCustomers(mockCustomers);
-      showToast('Data berhasil di-reset ke nilai awal bawaan!');
+      setSettings(defaultStoreSettings);
+      showToast('Semua data berhasil di-reset ke nilai bawaan pabrik!');
     }
+  };
+
+  // Settings Save Handler
+  const handleSaveSettings = (newSettings: StoreSettings) => {
+    setSettings(newSettings);
+    showToast('Pengaturan toko & format printer thermal berhasil disimpan!');
   };
 
   // Customer Management Handlers
@@ -522,63 +546,11 @@ export default function DashboardPage() {
           )}
 
           {activeTab === 'pengaturan' && (
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs max-w-3xl">
-              <div className="flex items-center gap-2 mb-2">
-                <SettingsIcon className="w-5 h-5 text-indigo-600" />
-                <h2 className="text-base font-bold text-slate-900">Pengaturan Toko Sepatu</h2>
-              </div>
-              <p className="text-xs text-slate-500 mb-6">
-                Konfigurasi profil toko fisik, nomor WhatsApp kasir, dan rekening penerimaan.
-              </p>
-
-              <div className="space-y-4 text-xs">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Nama Toko Retail</label>
-                  <input
-                    type="text"
-                    defaultValue="KICKSMATE - Sneakers & Footwear Vault"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-800"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Kota / Cabang</label>
-                    <input
-                      type="text"
-                      defaultValue="Bandung - Cabang Dago"
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-800"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-semibold text-slate-700 mb-1">Mata Uang</label>
-                    <input
-                      type="text"
-                      defaultValue="IDR (Rupiah Rp)"
-                      disabled
-                      className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-100 text-slate-600"
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-4 flex items-center justify-between border-t border-slate-100">
-                  <button
-                    onClick={() => showToast('Pengaturan toko berhasil diperbarui')}
-                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors shadow-sm shadow-indigo-200"
-                  >
-                    Simpan Perubahan
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleResetDefaultData}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 text-rose-600 hover:bg-rose-50 border border-rose-200/80 rounded-xl font-semibold transition-all text-xs"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Reset Data ke Awal (Hapus Cache)</span>
-                  </button>
-                </div>
-              </div>
-            </div>
+            <SettingsModule
+              settings={settings}
+              onSaveSettings={handleSaveSettings}
+              onResetData={handleResetDefaultData}
+            />
           )}
         </main>
       </div>
@@ -614,6 +586,7 @@ export default function DashboardPage() {
         isOpen={isReceiptOpen}
         onClose={() => setIsReceiptOpen(false)}
         onNewTransaction={() => setIsReceiptOpen(false)}
+        settings={settings}
       />
     </div>
   );

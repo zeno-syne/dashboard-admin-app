@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { PosTransaction } from '@/types';
+import { PosTransaction, StoreSettings } from '@/types';
 import { X, Printer, CheckCircle, Share2, Footprints } from 'lucide-react';
 
 interface ReceiptModalProps {
@@ -9,6 +9,7 @@ interface ReceiptModalProps {
   isOpen: boolean;
   onClose: () => void;
   onNewTransaction: () => void;
+  settings?: StoreSettings;
 }
 
 export default function ReceiptModal({
@@ -16,6 +17,7 @@ export default function ReceiptModal({
   isOpen,
   onClose,
   onNewTransaction,
+  settings,
 }: ReceiptModalProps) {
   if (!isOpen || !transaction) return null;
 
@@ -25,9 +27,23 @@ export default function ReceiptModal({
     window.print();
   };
 
+  const is58mm = settings?.paperSize === '58mm';
+  const storeName = settings?.storeName || 'KICKSMATE SNEAKERS';
+  const tagline = settings?.tagline || 'Footwear & Sneakers Vault';
+  const branchName = transaction.branchName || settings?.branchName || 'Outlet Dago Sneakers - Bandung';
+  const address = settings?.address || 'Jl. Ir. H. Juanda No. 102, Dago, Bandung';
+  const phone = settings?.phone || '0812-2299-8801';
+  const instagram = settings?.instagram || '@kicksmate.id';
+  const website = settings?.website || 'kicksmate.id';
+  const showLogo = settings?.showLogoOnReceipt ?? true;
+  const returnPolicyDays = settings?.returnPolicyDays ?? 3;
+  const customFooter = settings?.customFooterText || 'Barang yang sudah dibeli dapat ditukar ukuran dalam kondisi belum terpakai.';
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
-      <div className="bg-white rounded-2xl max-w-sm w-full border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in-50 zoom-in-95 duration-150 my-6">
+      <div className={`bg-white rounded-2xl w-full border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in-50 zoom-in-95 duration-150 my-6 transition-all ${
+        is58mm ? 'max-w-[320px]' : 'max-w-[370px]'
+      }`}>
         {/* Top notification bar */}
         <div className="bg-emerald-600 px-4 py-3 text-white flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -53,15 +69,18 @@ export default function ReceiptModal({
           >
             {/* Store Brand Header */}
             <div className="text-center pb-2 border-b border-dashed border-slate-300">
-              <div className="flex items-center justify-center gap-1.5 font-bold text-slate-900 text-sm tracking-wider">
-                <Footprints className="w-4 h-4 text-indigo-600" />
-                <span>KICKSMATE SNEAKERS</span>
-              </div>
-              <p className="text-[10px] text-slate-500 font-sans mt-0.5">Footwear & Sneakers Vault</p>
+              {showLogo && (
+                <div className="flex items-center justify-center gap-1.5 font-bold text-slate-900 text-sm tracking-wider">
+                  <Footprints className="w-4 h-4 text-indigo-600" />
+                  <span>{storeName.toUpperCase()}</span>
+                </div>
+              )}
+              <p className="text-[10px] text-slate-500 font-sans mt-0.5">{tagline}</p>
               <p className="text-[10px] text-slate-500 font-sans">
-                {transaction.branchName || 'Outlet Dago Sneakers - Bandung'}
+                {branchName}
               </p>
-              <p className="text-[9px] text-slate-400 font-sans">Telp: 0812-2299-8801</p>
+              <p className="text-[9px] text-slate-400 font-sans">{address}</p>
+              <p className="text-[9px] text-slate-400 font-sans">WA: {phone} • {instagram}</p>
             </div>
 
             {/* Meta info */}
@@ -140,9 +159,10 @@ export default function ReceiptModal({
             {/* Footer remarks */}
             <div className="text-center text-[9px] text-slate-400 font-sans space-y-1 pt-1">
               <p>Struk ini merupakan bukti pembayaran sah.</p>
-              <p>Tukar ukuran max 3 hari dengan menyertakan struk & kondisi sepatu baru.</p>
+              <p>{customFooter}</p>
+              <p>Tukar ukuran max {returnPolicyDays} hari dengan menyertakan struk & kondisi baru.</p>
               <p className="font-bold text-slate-600 mt-2">Terima kasih atas kunjungan Anda!</p>
-              <p className="font-mono text-[8px] text-slate-300">kicksmate.id</p>
+              <p className="font-mono text-[8px] text-slate-400">{website}</p>
             </div>
           </div>
         </div>
